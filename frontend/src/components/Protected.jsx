@@ -11,6 +11,11 @@ export default function Protected({ children, roles }) {
     );
   }
   if (!user) return <Navigate to="/login" replace />;
-  if (roles && !roles.includes(user.role)) return <Navigate to="/dashboard" replace />;
+  if (roles && !roles.includes(user.role)) {
+    // consumers don't have a business dashboard — send them to shop
+    if (user.role === "consumer") return <Navigate to="/shop" replace />;
+    if (user.role === "jompstart_admin") return <Navigate to="/admin/credit" replace />;
+    return <Navigate to="/dashboard" replace />;
+  }
   return children;
 }

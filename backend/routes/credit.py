@@ -15,6 +15,7 @@ from db import db
 from auth import get_current_user, require_roles
 from models import User
 from emailer import send_email, wrap_email
+from repayment import create_schedule, mark_overdue_installments
 
 router = APIRouter(prefix="/api/credit", tags=["credit"])
 
@@ -214,12 +215,71 @@ async def accept_offer(aid: str, user: User = Depends(get_current_user)):
             "timeline": tl + [{"at": _now_iso(), "event": "disbursed", "by": "jompstart_system"}],
         }},
     )
+    # Generate repayment schedule
+    refreshed = await db.credit_applications.find_one({"id": aid}, {"_id": 0})
+    try:
+        await create_schedule(refreshed)
+    except Exception as e:
+        # don't block accept on schedule generation
+        import logging
+        logging.getLogger("helix.credit").exception("schedule gen failed: %s", e)
     return {"status": "disbursed", "transaction_id": tx_id, "amount_usd": doc["offered_amount_usd"]}
+
+
+# ---------- repayment ----------
+
+@router.get("/applications/{aid}/repayment")
+async def get_repayment(aid: str, user: User = Depends(get_current_user)):
+    doc = await db.credit_applications.find_one({"id": aid}, {"_id": 0})
+    if not doc:
+        raise HTTPException(404)
+    if doc["business_id"] != user.business_id and user.role not in ("admin", "super_admin", "jompstart_admin"):
+        raise HTTPException(403)
+    await mark_overdue_installments()
+    items = await db.repayment_installments.find({"application_id": aid}, {"_id": 0}).sort("installment_number", 1).to_list(500)
+    total_due = sum(i["total_due_usd"] for i in items)
+    total_paid = sum(i["paid_usd"] for i in items)
+    next_due = next((i for i in items if i["status"] in ("pending", "partial", "overdue")), None)
+    return {
+        "application": doc,
+        "installments": items,
+        "total_due_usd": round(total_due, 2),
+        "total_paid_usd": round(total_paid, 2),
+        "outstanding_usd": round(total_due - total_paid, 2),
+        "next_due": next_due,
+    }
+
+
+@router.get("/repayments/mine")
+async def my_repayments(user: User = Depends(get_current_user)):
+    if not user.business_id:
+        return {"applications": [], "total_outstanding_usd": 0}
+    await mark_overdue_installments()
+    # all disbursed apps
+    apps = await db.credit_applications.find(
+        {"business_id": user.business_id, "status": {"$in": ["disbursed"]}}, {"_id": 0}
+    ).to_list(500)
+    result = []
+    total_outstanding = 0.0
+    for a in apps:
+        inst = await db.repayment_installments.find({"application_id": a["id"]}, {"_id": 0}).sort("installment_number", 1).to_list(500)
+        due = sum(i["total_due_usd"] for i in inst)
+        paid = sum(i["paid_usd"] for i in inst)
+        outstanding = round(due - paid, 2)
+        total_outstanding += outstanding
+        next_due = next((i for i in inst if i["status"] in ("pending", "partial", "overdue")), None)
+        result.append({
+            "application": a,
+            "installments": inst,
+            "outstanding_usd": outstanding,
+            "next_due": next_due,
+        })
+    return {"applications": result, "total_outstanding_usd": round(total_outstanding, 2)}
 
 
 # ---------- admin ----------
 
-@router.get("/admin/applications", dependencies=[Depends(require_roles("admin", "super_admin"))])
+@router.get("/admin/applications", dependencies=[Depends(require_roles("admin", "super_admin", "jompstart_admin"))])
 async def admin_list():
     items = await db.credit_applications.find({}, {"_id": 0}).sort("created_at", -1).to_list(500)
     # decorate with business name
@@ -230,7 +290,7 @@ async def admin_list():
     return items
 
 
-@router.post("/admin/applications/{aid}/decision", dependencies=[Depends(require_roles("admin", "super_admin"))])
+@router.post("/admin/applications/{aid}/decision", dependencies=[Depends(require_roles("admin", "super_admin", "jompstart_admin"))])
 async def admin_decision(aid: str, payload: dict):
     """decision: offered | rejected.
     For offered: provide offered_amount_usd, offered_apr, offered_term_months, decision_note.

@@ -16,7 +16,7 @@ def _now() -> datetime:
     return datetime.now(timezone.utc)
 
 
-Role = Literal["exporter", "buyer", "admin", "super_admin"]
+Role = Literal["exporter", "buyer", "admin", "super_admin", "jompstart_admin", "consumer"]
 RegistrationType = Literal["individual", "business"]
 Sector = Literal["fashion", "agriculture", "staple-foods", "general-goods"]
 KycStatus = Literal["pending", "under_review", "approved", "rejected"]
@@ -240,4 +240,95 @@ class Dispute(BaseModel):
     evidence_urls: List[str] = Field(default_factory=list)
     status: Literal["open", "under_review", "resolved", "rejected"] = "open"
     resolution: Optional[str] = None
+    created_at: datetime = Field(default_factory=_now)
+
+
+# ---------- Consumer Shop ----------
+
+FulfillmentMode = Literal["buyer_local", "riby_dtc"]
+
+
+class ShopListing(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=_uuid)
+    owner_business_id: str  # Buyer (buyer_local) or Exporter (riby_dtc)
+    title: str
+    description: str = ""
+    photos: List[str] = Field(default_factory=list)
+    category: Sector = "general-goods"
+    retail_price_usd: float
+    stock_qty: int = 0
+    fulfillment_mode: FulfillmentMode  # buyer_local | riby_dtc
+    source_order_id: Optional[str] = None  # the trade order this stock came from
+    source_product_id: Optional[str] = None
+    country_of_origin: str = "Nigeria"
+    ships_from: str = ""
+    delivery_partner_of_record: str = ""  # "Riby Inc" for riby_dtc listings
+    status: Literal["active", "out_of_stock", "archived"] = "active"
+    created_at: datetime = Field(default_factory=_now)
+
+
+class ShopListingCreate(BaseModel):
+    title: str
+    description: str = ""
+    photos: List[str] = Field(default_factory=list)
+    category: Sector = "general-goods"
+    retail_price_usd: float
+    stock_qty: int = 1
+    fulfillment_mode: FulfillmentMode
+    source_order_id: Optional[str] = None
+    source_product_id: Optional[str] = None
+    ships_from: str = ""
+
+
+class ConsumerOrder(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=_uuid)
+    order_number: str = Field(default_factory=lambda: f"SHP-{uuid.uuid4().hex[:8].upper()}")
+    consumer_user_id: str
+    listing_id: str
+    listing_title: str
+    quantity: int
+    unit_price_usd: float
+    total_usd: float
+    seller_business_id: str
+    fulfillment_mode: FulfillmentMode
+    delivery_partner_of_record: str = ""  # "Riby Inc" if DTC
+    shipping_name: str
+    shipping_address: str
+    shipping_email: EmailStr
+    shipping_phone: str = ""
+    status: Literal["paid", "processing", "shipped", "delivered", "cancelled"] = "paid"
+    tracking_number: Optional[str] = None
+    payment_ref: str
+    created_at: datetime = Field(default_factory=_now)
+
+
+class ConsumerOrderCreate(BaseModel):
+    listing_id: str
+    quantity: int = 1
+    shipping_name: str
+    shipping_address: str
+    shipping_email: EmailStr
+    shipping_phone: str = ""
+
+
+# ---------- JompStart repayments ----------
+
+InstallmentStatus = Literal["pending", "paid", "partial", "overdue"]
+
+
+class RepaymentInstallment(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=_uuid)
+    application_id: str
+    business_id: str
+    installment_number: int
+    due_date: str  # iso date
+    principal_usd: float
+    interest_usd: float
+    total_due_usd: float
+    paid_usd: float = 0
+    status: InstallmentStatus = "pending"
+    paid_at: Optional[str] = None
     created_at: datetime = Field(default_factory=_now)

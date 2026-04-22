@@ -10,7 +10,12 @@ const AGRO_IMG = "https://images.unsplash.com/photo-1622676566956-b42b50c84c31?c
 export default function Landing() {
   const { user } = useAuth();
   const nav = useNavigate();
-  useEffect(() => { if (user) nav("/dashboard"); }, [user, nav]);
+  useEffect(() => {
+    if (!user) return;
+    if (user.role === "consumer") nav("/shop");
+    else if (user.role === "jompstart_admin") nav("/admin/credit");
+    else nav("/dashboard");
+  }, [user, nav]);
 
   return (
     <div className="min-h-screen bg-[#0A1628] text-[#F5F5F5]">
@@ -27,6 +32,7 @@ export default function Landing() {
           <nav className="hidden md:flex items-center gap-8 text-[13px] text-[#9CA3AF]">
             <a href="#solutions" className="hover:text-[#F5F5F5]">Solutions</a>
             <a href="#modules" className="hover:text-[#F5F5F5]">Modules</a>
+            <Link to="/shop" className="hover:text-[#F5F5F5]" data-testid="shop-nav-link">Shop</Link>
             <a href="#partners" className="hover:text-[#F5F5F5]">Partners</a>
           </nav>
           <div className="flex items-center gap-3">
@@ -57,6 +63,9 @@ export default function Landing() {
               </Link>
               <Link to="/catalog" data-testid="hero-cta-browse" className="helix-btn-secondary inline-flex items-center gap-2">
                 Browse marketplace
+              </Link>
+              <Link to="/shop" data-testid="hero-cta-shop" className="text-[13px] text-[#C9922A] font-semibold inline-flex items-center gap-1 hover:gap-2 transition-all pl-2">
+                Or shop direct from Africa →
               </Link>
             </div>
 

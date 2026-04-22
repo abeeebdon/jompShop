@@ -24,7 +24,13 @@ export default function Login() {
     try {
       const user = await login(email, password);
       toast.success(`Welcome back, ${user.name.split(" ")[0]}`);
-      const to = loc.state?.from || (["admin", "super_admin"].includes(user.role) ? "/admin" : "/dashboard");
+      let to = loc.state?.from;
+      if (!to) {
+        if (user.role === "consumer") to = "/shop";
+        else if (user.role === "jompstart_admin") to = "/admin/credit";
+        else if (["admin", "super_admin"].includes(user.role)) to = "/admin";
+        else to = "/dashboard";
+      }
       nav(to, { replace: true });
     } catch (err) {
       toast.error(err.response?.data?.detail || "Login failed");
@@ -75,6 +81,8 @@ export default function Login() {
           <div>exporter@helix.com · Helix@123</div>
           <div>buyer@helix.com · Helix@123</div>
           <div>admin@helix.com · Helix@123</div>
+          <div>credit@jompstart.com · Helix@123 <span className="text-[#1A7A6E]">(JompStart)</span></div>
+          <div>shopper@helix.com · Helix@123 <span className="text-[#1A7A6E]">(consumer)</span></div>
         </div>
       </div>
     </AuthShell>

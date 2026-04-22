@@ -58,7 +58,29 @@ async def seed_if_empty():
         "business_id": None,
         "created_at": _now_iso(),
     }
-    await db.users.insert_many([admin, exporter, buyer])
+    jomp = {
+        "user_id": str(uuid.uuid4()),
+        "email": "credit@jompstart.com",
+        "name": "Ifeoma · JompStart Credit",
+        "role": "jompstart_admin",
+        "password_hash": hash_password("Helix@123"),
+        "auth_provider": "jwt",
+        "picture": None,
+        "business_id": None,
+        "created_at": _now_iso(),
+    }
+    consumer = {
+        "user_id": str(uuid.uuid4()),
+        "email": "shopper@helix.com",
+        "name": "Jordan Bell",
+        "role": "consumer",
+        "password_hash": hash_password("Helix@123"),
+        "auth_provider": "jwt",
+        "picture": None,
+        "business_id": None,
+        "created_at": _now_iso(),
+    }
+    await db.users.insert_many([admin, exporter, buyer, jomp, consumer])
 
     # ---------- Businesses ----------
     exp_cust = create_business_customer({"name": "Lagos Heritage Textiles Ltd", "email": "exporter@helix.com"})
@@ -418,4 +440,61 @@ async def seed_if_empty():
     ]
     await db.compliance_documents.insert_many(compliance_docs)
 
-    log.info("Seed complete: 3 users, 2 businesses, %d products, 2 orders, %d compliance docs", len(product_docs), len(compliance_docs))
+    # ---------- Shop listings ----------
+    # Buyer local inventory (Brooklyn warehouse re-sell)
+    buyer_listing = {
+        "id": str(uuid.uuid4()),
+        "owner_business_id": byr_biz["id"],
+        "title": "Ofada Rice 5kg Retail Bag — From Brooklyn Warehouse",
+        "description": "Authentic single-origin Ofada rice imported direct from Ogun State, Nigeria. Repackaged into retail-ready 5kg bags at our Brooklyn facility. Ships within 48 hours across the US.",
+        "photos": ["https://images.unsplash.com/photo-1622676566956-b42b50c84c31?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NTJ8MHwxfHNlYXJjaHwzfHxhZ3JpY3VsdHVyZSUyMGZhcm1lciUyMGFmcmljYW58ZW58MHx8fHwxNzc2ODI0NTYxfDA&ixlib=rb-4.1.0&q=85"],
+        "category": "staple-foods",
+        "retail_price_usd": 24.99,
+        "stock_qty": 120,
+        "fulfillment_mode": "buyer_local",
+        "source_order_id": o2_id,  # from the delivered trade order
+        "source_product_id": p2["id"],
+        "country_of_origin": "Nigeria",
+        "ships_from": "Brooklyn, NY",
+        "delivery_partner_of_record": "",
+        "status": "active",
+        "created_at": _now_iso(),
+    }
+    # Exporter DTC (Riby Inc of record)
+    exp_listing = {
+        "id": str(uuid.uuid4()),
+        "owner_business_id": exp_biz["id"],
+        "title": "Unrefined Shea Butter 500g Jar — Direct from Nigeria",
+        "description": "Grade A unrefined shea butter hand-whipped by Northern Nigeria women's cooperatives. 500g glass jars, individually labeled. Ships direct — Riby Inc handles US import and last-mile delivery.",
+        "photos": ["https://images.unsplash.com/photo-1622676566956-b42b50c84c31?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NTJ8MHwxfHNlYXJjaHwzfHxhZ3JpY3VsdHVyZSUyMGZhcm1lciUyMGFmcmljYW58ZW58MHx8fHwxNzc2ODI0NTYxfDA&ixlib=rb-4.1.0&q=85"],
+        "category": "agriculture",
+        "retail_price_usd": 32.00,
+        "stock_qty": 60,
+        "fulfillment_mode": "riby_dtc",
+        "source_product_id": product_docs[4]["id"],
+        "country_of_origin": "Nigeria",
+        "ships_from": "Lagos, Nigeria → Riby US fulfillment",
+        "delivery_partner_of_record": "Riby Inc",
+        "status": "active",
+        "created_at": _now_iso(),
+    }
+    exp_listing_2 = {
+        "id": str(uuid.uuid4()),
+        "owner_business_id": exp_biz["id"],
+        "title": "Handwoven Adire Scarf — Lagos Artisan Edition",
+        "description": "Hand-dyed Adire indigo scarf (180×50cm) from Abeokuta artisans. Individually numbered. Riby Inc imports and fulfills in the US on behalf of the maker.",
+        "photos": ["https://images.unsplash.com/photo-1768212566108-4ce4f329e4d2?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1ODB8MHwxfHNlYXJjaHwxfHxmYXNoaW9uJTIwdGV4dGlsZXMlMjBhZnJpY2FufGVufDB8fHx8MTc3NjgyNDU2MHww&ixlib=rb-4.1.0&q=85"],
+        "category": "fashion",
+        "retail_price_usd": 89.00,
+        "stock_qty": 45,
+        "fulfillment_mode": "riby_dtc",
+        "source_product_id": product_docs[0]["id"],
+        "country_of_origin": "Nigeria",
+        "ships_from": "Lagos → Riby US fulfillment",
+        "delivery_partner_of_record": "Riby Inc",
+        "status": "active",
+        "created_at": _now_iso(),
+    }
+    await db.shop_listings.insert_many([buyer_listing, exp_listing, exp_listing_2])
+
+    log.info("Seed complete: 5 users, 2 businesses, %d products, 2 orders, %d compliance docs, 3 shop listings", len(product_docs), len(compliance_docs))

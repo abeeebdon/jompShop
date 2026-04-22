@@ -2,6 +2,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import {
   HouseSimple, Package, Receipt, ShieldCheck, Wallet, Users,
   SignOut, ArrowsClockwise, CaretRight, Storefront, FileText, CurrencyCircleDollar, Gauge, HandCoins,
+  Truck, ShoppingCart,
 } from "@phosphor-icons/react";
 import { useAuth } from "../lib/auth-context";
 
@@ -11,15 +12,20 @@ const NAV = {
     { to: "/my-products", label: "My Products", icon: Package },
     { to: "/catalog", label: "Marketplace", icon: Storefront },
     { to: "/orders", label: "Orders", icon: Receipt },
+    { to: "/sell", label: "Sell Direct (DTC)", icon: Truck },
+    { to: "/fulfillment", label: "Fulfillment", icon: ShoppingCart },
     { to: "/compliance", label: "Compliance", icon: ShieldCheck },
     { to: "/finance", label: "Finance", icon: Wallet },
     { to: "/credit", label: "Business Credit", icon: HandCoins },
+    { to: "/repayment", label: "Repayments", icon: ArrowsClockwise },
     { to: "/onboarding", label: "Business Profile", icon: FileText },
   ],
   buyer: [
     { to: "/dashboard", label: "Command Center", icon: Gauge },
     { to: "/catalog", label: "Marketplace", icon: Storefront },
     { to: "/orders", label: "My Orders", icon: Receipt },
+    { to: "/sell", label: "Local Inventory Shop", icon: ShoppingCart },
+    { to: "/fulfillment", label: "Fulfillment", icon: Truck },
     { to: "/finance", label: "Finance", icon: Wallet },
     { to: "/onboarding", label: "Business Profile", icon: FileText },
   ],
@@ -30,6 +36,9 @@ const NAV = {
     { to: "/admin/disputes", label: "Disputes", icon: ArrowsClockwise },
     { to: "/admin/finance", label: "Financial Overview", icon: CurrencyCircleDollar },
     { to: "/catalog", label: "Marketplace", icon: Storefront },
+  ],
+  jompstart_admin: [
+    { to: "/admin/credit", label: "JompStart Credit", icon: HandCoins },
   ],
 };
 

@@ -14,6 +14,7 @@ from emailer import send_email, wrap_email
 from pdf_gen import (
     proforma_invoice_pdf, commercial_invoice_pdf, packing_list_pdf, certificate_of_origin_pdf,
 )
+from repayment import auto_debit_on_credit
 
 router = APIRouter(prefix="/api", tags=["orders"])
 log = logging.getLogger("helix.orders")
@@ -272,7 +273,7 @@ async def simulate_payment(oid: str, user: User = Depends(get_current_user)):
                 cta_label="View Order", cta_url=f"/orders/{oid}",
             ),
         )
-    return {"status": "confirmed", "amount": o["agreed_price_usd"], "fee": fee_amount}
+    return {"status": "confirmed", "amount": o["agreed_price_usd"], "fee": fee_amount, "jompstart_auto_debit": await auto_debit_on_credit(o["supplier_id"], source_description=f"Order {o['order_number']}")}
 
 
 # ---------- Disputes ----------

@@ -1,0 +1,69 @@
+{
+  "summary": "Iteration 3 backend tests for Consumer e-commerce (Helix Shop) + JompStart repayment schedule + auto-debit + jompstart_admin role isolation + consumer role restrictions + regression. Ran 24 pytest cases against the live preview URL — 21 passed, 2 FAILED (same root cause: POST /api/shop/listings 500), 1 skipped (no pending trade order for exporter → trade-payment auto-debit path could not be exercised). All other new features work end-to-end: public storefront + filters, consumer checkout on buyer_local, seller credit + 2% fee ledger entries, fulfillment/ship/delivered, jompstart_admin allowed on credit admin but 403 on verifications/disputes/finance overview, amortised 6-month schedule (~$870.64/mo, total ≈ $5,223.84) generated on accept, auto-debit triggered by consumer order (outstanding reduced), consumer role correctly blocked from business endpoints, Anchor stays MOCKED.",
+  "backend_issues": {
+    "critical": [
+      {
+        "endpoint": "POST /api/shop/listings",
+        "issue": "Always returns 500 — TypeError: models.ShopListing() got multiple values for keyword argument 'ships_from'. In /app/backend/routes/shop.py create_listing(), `ships_from=...` is passed explicitly AND also re-passed via `**payload.model_dump()` (ShopListingCreate has `ships_from`). Exporters and buyers can NOT create any new listings via the API. Seeded listings are unaffected because seed.py writes raw dicts.",
+        "priority": "CRITICAL"
+      }
+    ],
+    "minor": [
+      {
+        "endpoint": "POST /api/shop/listings",
+        "issue": "Even after fixing the kwarg collision, the same pattern will also duplicate `fulfillment_mode`, `title`, `description`, `photos`, `category`, `retail_price_usd`, `stock_qty`, `source_order_id`, `source_product_id` if any explicit-kwarg is later added. Recommend constructing as `ShopListing(**payload.model_dump(), owner_business_id=..., country_of_origin=..., ships_from=payload.ships_from or biz.get('address',''), delivery_partner_of_record=...)` and popping/overriding explicitly, OR build from a dict and validate."
+      },
+      {
+        "endpoint": "GET /api/shop/listings",
+        "issue": "N+1 on businesses lookup — one find_one per listing for seller decoration. Fine now, switch to `$in` batch once catalog grows."
+      },
+      {
+        "endpoint": "POST /api/shop/orders",
+        "issue": "Stock check + decrement are not atomic. Two concurrent consumer orders for the last unit can both succeed (both read stock_qty=1, both insert, then one sets stock to 0 and the other to -1). Use `find_one_and_update` with `$inc: -qty` and `stock_qty: {$gte: qty}` filter."
+      },
+      {
+        "endpoint": "POST /api/shop/orders",
+        "issue": "If the business owning the listing has no `owner_user_id` or the user doc is missing, the code branch `owner = await db.users.find_one({'user_id': biz['owner_user_id']})` runs but `biz` may be None earlier — send_email block guards on owner but not on biz absence for the description-variable (`order['delivery_partner_of_record']`). Works today only because seed guarantees biz exists."
+      },
+      {
+        "endpoint": "POST /api/orders/{oid}/simulate-payment",
+        "issue": "`jompstart_auto_debit` is returned from the handler but the hook is only awaited inline in the response dict; if it raises, the whole request 500s AFTER the credit + fee are already written. Wrap in try/except like /credit/accept does for schedule generation."
+      },
+      {
+        "endpoint": "GET /api/credit/applications/{aid}/repayment",
+        "issue": "Calls `mark_overdue_installments()` on every read — cheap today but should be a background job."
+      }
+    ]
+  },
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/test_iteration3.py",
+    "/app/test_reports/pytest/pytest_iter3.xml"
+  ],
+  "action_items": [
+    "CRITICAL: Fix /app/backend/routes/shop.py create_listing() — remove duplicate `ships_from` kwarg (either stop passing it explicitly, or drop it from payload before spreading). Without this fix no new Helix Shop listing can be created via API (exporter or buyer). Seeded listings still work, so the consumer-side flow masked this during manual testing.",
+    "Add atomic stock decrement in POST /api/shop/orders (find_one_and_update with conditional $inc).",
+    "Wrap auto_debit_on_credit in try/except inside orders.simulate-payment and shop.place_order so a schedule/installment bug cannot roll back the trade or consumer payment.",
+    "(From iter2, still open) Validate current status before admin decision transitions; collapse the two sequential update_one in accept_offer; rename `transaction_id` → `disbursement_tx_id` in accept response."
+  ],
+  "critical_code_review_comments": [
+    "shop.py create_listing uses kwargs + **payload.model_dump() — this pattern breaks as soon as one field is duplicated (as happened with ships_from). Build the ShopListing dict explicitly instead.",
+    "repayment.build_schedule is clean and correctly adjusts the last installment to clear rounding drift (observed installment #6 = $870.59 vs #1-5 = $870.65 for $5000/15%/6mo, total $5,223.84).",
+    "auto_debit_on_credit recomputes full USD balance (N transactions) every hook — acceptable for MVP but will be O(N) per credit/fee/shop order; cache per-business balance or use an aggregation pipeline once tx volume grows.",
+    "All Mongo responses strip `_id` — no ObjectId leaks observed in the new shop, repayment, or credit endpoints.",
+    "jompstart_admin role correctly added to credit admin endpoints via require_roles; confirmed 200 on /api/credit/admin/applications, 403 on /api/admin/verifications, /api/admin/disputes, /api/admin/finance/overview.",
+    "Consumer role properly isolated: /api/businesses/me returns null, /api/orders/mine returns [], /api/products POST returns 400 (due to no business_id guard, not explicit role check — consider adding an explicit role guard for clarity).",
+    "ConsumerOrder stores `consumer_user_id` but has no index hint — queries /orders/mine scan all. Add index on consumer_user_id + seller_business_id.",
+    "Order endpoint response for simulate-payment now returns `jompstart_auto_debit` inline; if the hook returns None, the key is null — frontends must handle the null case (confirmed in test)."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iteration3.py (created — 24 pytest cases across 6 classes)"
+  ],
+  "success_rate": {"backend": "87.5% (21/24 pass, 2 fail, 1 skipped)", "frontend": "not tested (per request)"},
+  "test_credentials": "Used /app/memory/test_credentials.md verbatim: admin@helix.com, credit@jompstart.com, exporter@helix.com, buyer@helix.com, shopper@helix.com — all with password Helix@123.",
+  "seed_data_creation": "No new seed data. Tests create one TEST_ credit application per run (left in DB — fine because exporter's max_limit and each run uses a fresh uuid). The two failing POST /api/shop/listings tests did NOT persist any data because the 500 happened before the insert. One consumer order was placed on the seeded buyer_local Ofada Rice listing (stock decremented from 120 → ~116 across the 4 test orders). One $5000 JompStart application accepted → disbursed and schedule paid-down partially via consumer order. If a clean re-run is required, drop collections: credit_applications, repayment_installments, consumer_orders, and reset shop_listings stock, or re-seed.",
+  "retest_needed": true,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Iteration 3 new surface area: routes/shop.py, repayment.py, updated credit.py (jompstart_admin + schedule + /repayment endpoints), orders.py simulate-payment now returns `jompstart_auto_debit`. ONE CRITICAL bug: POST /api/shop/listings 500s because `ships_from` is passed twice into ShopListing(). All other new features confirmed working end-to-end on live preview URL. The skipped test `test_auto_debit_on_trade_payment` could not run because the seeded exporter has no remaining pending-payment trade order (only HLX-XXXX order was consumed by a prior iteration/manual smoke). To exercise that path, the main agent can either (a) re-seed or (b) submit a fresh RFQ via the buyer demo user → proforma → then simulate-payment. Auto-debit WAS verified end-to-end via the consumer-order path: outstanding_usd reduced after a consumer order on exporter's DTC listing, proving repayment.auto_debit_on_credit fires from both trade and consumer credit events as designed.",
+  "rca of the issue": "RCA of POST /api/shop/listings 500:\n  File: /app/backend/routes/shop.py, function create_listing()\n  Lines ~92-98:\n    listing = ShopListing(\n        owner_business_id=user.business_id,\n        country_of_origin=...,\n        ships_from=payload.ships_from or (biz.get('address') or ''),\n        delivery_partner_of_record=RIBY_PARTNER if payload.fulfillment_mode == 'riby_dtc' else '',\n        **payload.model_dump(),           # ← payload already contains `ships_from`\n    )\n  payload is a ShopListingCreate which declares `ships_from: str = ''`. model_dump() therefore re-injects ships_from as a kwarg and Python raises TypeError: multiple values for keyword argument 'ships_from'.\n\n  Reproduction:\n    1. Login as exporter@helix.com → token T\n    2. curl -H \"Authorization: Bearer T\" -H 'Content-Type: application/json' -d '{\"title\":\"x\",\"retail_price_usd\":10,\"stock_qty\":1,\"fulfillment_mode\":\"riby_dtc\",\"category\":\"fashion\"}' $BASE/api/shop/listings\n    3. Observe 500 + backend log: `TypeError: models.ShopListing() got multiple values for keyword argument 'ships_from'`.\n\n  Mitigation (pick one):\n    A) Drop ships_from from payload before spread:\n       data = payload.model_dump()\n       data['ships_from'] = payload.ships_from or (biz.get('address') or '')\n       listing = ShopListing(owner_business_id=user.business_id,\n                             country_of_origin=...,\n                             delivery_partner_of_record=...,\n                             **data)\n    B) Or spread first then override explicit fields:\n       listing = ShopListing(\n           **payload.model_dump(),\n           owner_business_id=user.business_id,\n           country_of_origin=...,\n           delivery_partner_of_record=...,\n       )\n       # then set ships_from fallback separately\n    Add a regression pytest asserting both a buyer and an exporter can create a listing."
+}

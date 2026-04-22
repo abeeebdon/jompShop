@@ -22,6 +22,12 @@ import AdminDisputes from "./pages/AdminDisputes";
 import Credit from "./pages/Credit";
 import CreditDetail from "./pages/CreditDetail";
 import AdminCredit from "./pages/AdminCredit";
+import Shop from "./pages/Shop";
+import ShopProduct from "./pages/ShopProduct";
+import ConsumerOrders from "./pages/ConsumerOrders";
+import Sell from "./pages/Sell";
+import Fulfillment from "./pages/Fulfillment";
+import Repayment from "./pages/Repayment";
 
 function AppRouter() {
   const loc = useLocation();
@@ -30,6 +36,9 @@ function AppRouter() {
   return (
     <Routes>
       <Route path="/" element={<Landing />} />
+      <Route path="/shop" element={<Shop />} />
+      <Route path="/shop/product/:id" element={<ShopProduct />} />
+      <Route path="/shop/orders" element={<Protected><ConsumerOrders /></Protected>} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/dashboard" element={<Protected><Dashboard /></Protected>} />
@@ -43,10 +52,13 @@ function AppRouter() {
       <Route path="/finance" element={<Protected><Finance /></Protected>} />
       <Route path="/credit" element={<Protected roles={["exporter"]}><Credit /></Protected>} />
       <Route path="/credit/:id" element={<Protected><CreditDetail /></Protected>} />
+      <Route path="/repayment" element={<Protected roles={["exporter"]}><Repayment /></Protected>} />
+      <Route path="/sell" element={<Protected roles={["exporter", "buyer"]}><Sell /></Protected>} />
+      <Route path="/fulfillment" element={<Protected roles={["exporter", "buyer"]}><Fulfillment /></Protected>} />
       <Route path="/admin" element={<Protected roles={["admin", "super_admin"]}><AdminOverview /></Protected>} />
       <Route path="/admin/verifications" element={<Protected roles={["admin", "super_admin"]}><AdminVerifications /></Protected>} />
       <Route path="/admin/disputes" element={<Protected roles={["admin", "super_admin"]}><AdminDisputes /></Protected>} />
-      <Route path="/admin/credit" element={<Protected roles={["admin", "super_admin"]}><AdminCredit /></Protected>} />
+      <Route path="/admin/credit" element={<Protected roles={["admin", "super_admin", "jompstart_admin"]}><AdminCredit /></Protected>} />
       <Route path="/admin/finance" element={<Protected roles={["admin", "super_admin"]}><AdminOverview /></Protected>} />
     </Routes>
   );

@@ -18,7 +18,7 @@ export default function Register() {
     try {
       const user = await register(form);
       toast.success(`Welcome to Helix, ${user.name.split(" ")[0]}`);
-      nav("/onboarding");
+      if (user.role === "consumer") nav("/shop"); else nav("/onboarding");
     } catch (err) {
       toast.error(err.response?.data?.detail || "Register failed");
     } finally {
@@ -48,8 +48,9 @@ export default function Register() {
           <div>
             <label className="helix-label">I am registering as</label>
             <select data-testid="reg-role" className="helix-input" value={form.role} onChange={upd("role")}>
-              <option value="exporter">Exporter / Supplier</option>
-              <option value="buyer">Buyer / Importer</option>
+              <option value="exporter">Exporter / Supplier (Business)</option>
+              <option value="buyer">Buyer / Importer (Business)</option>
+              <option value="consumer">Consumer — just shopping</option>
             </select>
           </div>
           <button data-testid="register-submit" disabled={busy} className="helix-btn-primary w-full">
