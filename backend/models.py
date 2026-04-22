@@ -298,7 +298,12 @@ class ConsumerOrder(BaseModel):
     shipping_address: str
     shipping_email: EmailStr
     shipping_phone: str = ""
+    checkout_mode: Literal["order_prepay", "quote_prepay"] = "order_prepay"
+    quote_id: Optional[str] = None
     status: Literal["paid", "processing", "shipped", "delivered", "cancelled"] = "paid"
+    escrow_status: Literal["held", "released", "refunded"] = "held"
+    escrow_held_by: str = "Riby Inc"
+    escrow_released_at: Optional[str] = None
     tracking_number: Optional[str] = None
     payment_ref: str
     created_at: datetime = Field(default_factory=_now)
@@ -311,6 +316,43 @@ class ConsumerOrderCreate(BaseModel):
     shipping_address: str
     shipping_email: EmailStr
     shipping_phone: str = ""
+    quote_id: Optional[str] = None
+
+
+# ---------- Consumer Quote Requests ----------
+
+class QuoteRequest(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=_uuid)
+    quote_number: str = Field(default_factory=lambda: f"QTE-{uuid.uuid4().hex[:8].upper()}")
+    consumer_user_id: str
+    consumer_email: EmailStr
+    consumer_name: str
+    listing_id: str
+    listing_title: str
+    seller_business_id: str
+    quantity: int
+    message: str = ""
+    # seller response
+    quoted_unit_price_usd: Optional[float] = None
+    quoted_total_usd: Optional[float] = None
+    quote_note: Optional[str] = None
+    quote_valid_until: Optional[str] = None
+    status: Literal["pending", "quoted", "accepted", "declined", "expired", "converted"] = "pending"
+    created_at: datetime = Field(default_factory=_now)
+    updated_at: datetime = Field(default_factory=_now)
+
+
+class QuoteRequestCreate(BaseModel):
+    listing_id: str
+    quantity: int
+    message: str = ""
+
+
+class QuoteRespond(BaseModel):
+    quoted_unit_price_usd: float
+    quote_note: Optional[str] = ""
+    valid_days: int = 7
 
 
 # ---------- JompStart repayments ----------

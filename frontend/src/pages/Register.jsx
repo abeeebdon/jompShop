@@ -17,7 +17,7 @@ export default function Register() {
     setBusy(true);
     try {
       const user = await register(form);
-      toast.success(`Welcome to Helix, ${user.name.split(" ")[0]}`);
+          toast.success(`Welcome to Jomp Trade, ${user.name.split(" ")[0]}`);
       if (user.role === "consumer") nav("/shop"); else nav("/onboarding");
     } catch (err) {
       toast.error(err.response?.data?.detail || "Register failed");
@@ -29,7 +29,7 @@ export default function Register() {
   return (
     <AuthShell>
       <div className="w-full max-w-md helix-card p-8 fade-up">
-        <div className="helix-kicker mb-2">Helix · Create account</div>
+        <div className="helix-kicker mb-2">Jomp Trade · Create account</div>
         <h1 className="helix-h2">Start trading in minutes</h1>
         <p className="text-[#9CA3AF] text-sm mt-2">Open your business profile, upload CAC, receive USD.</p>
         <form onSubmit={submit} className="mt-7 space-y-4" data-testid="register-form">

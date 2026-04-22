@@ -23,10 +23,10 @@ export default function Landing() {
       <header className="fixed top-0 inset-x-0 z-30 bg-[#0A1628]/85 backdrop-blur border-b border-[#1A7A6E]/15">
         <div className="max-w-[1400px] mx-auto px-6 lg:px-10 py-4 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3" data-testid="brand-link">
-            <div className="w-8 h-8 rounded-sm" style={{ background: "linear-gradient(135deg,#C9922A,#1A7A6E)" }}/>
+            <img src="/jomp-favicon.png" alt="Jomp" className="w-9 h-9 rounded-full"/>
             <div className="leading-tight">
-              <div className="font-bold tracking-[0.22em] text-sm">HELIX</div>
-              <div className="text-[10px] tracking-[0.3em] text-[#1A7A6E] font-mono">PLATFORM</div>
+              <div className="font-bold tracking-[0.22em] text-sm">JOMP TRADE</div>
+              <div className="text-[10px] tracking-[0.3em] text-[#1A7A6E] font-mono">EXPORT OS</div>
             </div>
           </Link>
           <nav className="hidden md:flex items-center gap-8 text-[13px] text-[#9CA3AF]">
@@ -53,9 +53,10 @@ export default function Landing() {
               out of Nigeria &amp; Africa.
             </h1>
             <p className="mt-6 text-[17px] text-[#9CA3AF] leading-relaxed max-w-xl">
-              Helix unifies exporter onboarding, US-compliant product listings,
-              full order lifecycle, document automation and USD/NGN banking —
-              powered by GetAnchor — so one trade doesn&rsquo;t take ten tools.
+              Jomp Trade unifies exporter onboarding, US-compliant product listings,
+              full order lifecycle, document automation, and USD/NGN banking &mdash;
+              with Riby Inc escrow and JompStart credit under the hood &mdash; so one trade
+              doesn&rsquo;t take ten tools.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link to="/register" data-testid="hero-cta-primary" className="helix-btn-primary inline-flex items-center gap-2">
@@ -89,7 +90,7 @@ export default function Landing() {
               <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(10,22,40,0.25) 0%, rgba(10,22,40,0.78) 100%)" }}/>
               <div className="absolute bottom-5 left-5 right-5 helix-card !bg-[#0A1628]/85 p-4">
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-[10px] font-mono tracking-widest text-[#1A7A6E]">LIVE · ANCHOR SANDBOX</span>
+                  <span className="text-[10px] font-mono tracking-widest text-[#1A7A6E]">LIVE · ESCROW BY RIBY INC</span>
                   <span className="helix-status helix-status-ok">ONLINE</span>
                 </div>
                 <div className="font-mono text-[11px] text-[#F5F5F5] space-y-1">
@@ -112,9 +113,9 @@ export default function Landing() {
             {[
               { icon: ShieldCheck, title: "Onboarding & Verification", body: "Nigeria KYC / KYB with CAC, BVN, TIN. US-side EIN. Anchor customers created automatically on approval." },
               { icon: Package, title: "Product & Export Catalog", body: "Dual-currency pricing from live FX, compliance badges, marketplace browsable by buyers." },
-              { icon: ChartLineUp, title: "Trade & Order Management", body: "RFQ → Proforma → Confirmation → Production → Shipment → Delivery, with per-order virtual accounts." },
+              { icon: ChartLineUp, title: "Trade & Order Management", body: "RFQ → Proforma → Confirmation → Production → Shipment → Delivery, with Riby Inc–held escrow accounts per order." },
               { icon: ShieldCheck, title: "Compliance Vault", body: "SON, NAFDAC, phytosanitary, FDA prior notice. Expiry alerts at 30 and 7 days. Auto score per business." },
-              { icon: CurrencyCircleDollar, title: "Anchor-Powered Finance", body: "NGN + USD balances, reserved payment accounts, NIP withdrawals, book transfers, platform fees — all live." },
+              { icon: CurrencyCircleDollar, title: "Anchor-Powered Finance", body: "NGN + USD balances, virtual accounts, NIP withdrawals, book transfers, platform fees — all live via Anchor." },
               { icon: Lightning, title: "Document Automation", body: "Commercial Invoice, Packing List, Proforma, Certificate of Origin — generated on demand, ready to ship." },
             ].map((m, i) => {
               const Icon = m.icon;
@@ -138,8 +139,8 @@ export default function Landing() {
             <h2 className="helix-h2">Fashion &amp; textiles. Agriculture. Staple foods. Physical goods.</h2>
             <p className="text-[#9CA3AF] mt-5 leading-relaxed">
               From Adire panels shipping out of Abeokuta to single-origin Ofada rice headed to Brooklyn,
-              Helix routes every dollar and document through one place — while your USD balance sits with
-              Anchor&rsquo;s bank partner.
+              Jomp Trade routes every dollar and document through one place &mdash; with Riby Inc holding
+              buyer funds in escrow until goods land.
             </p>
             <div className="mt-8 grid grid-cols-2 gap-3 max-w-md">
               {["Fashion", "Agriculture", "Staple Foods", "General Goods"].map((s) => (
@@ -159,28 +160,32 @@ export default function Landing() {
         <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
           <div className="text-center">
             <div className="helix-kicker mb-3">Powered By</div>
-            <h2 className="helix-h2 max-w-2xl mx-auto">Four operating partners. One unified platform.</h2>
+            <h2 className="helix-h2 max-w-2xl mx-auto">Three operating partners. One unified platform.</h2>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-10">
-            <div className="helix-card p-6">
-              <div className="text-[#C9922A] font-bold tracking-[0.22em] text-sm">DOBBLEHELIX</div>
-              <div className="text-[10px] tracking-[0.3em] text-[#1A7A6E] font-mono mt-1">LIMITED</div>
-              <p className="text-[12px] text-[#9CA3AF] mt-4 leading-relaxed">Nigeria &amp; Africa operations, exporter onboarding and ground operations.</p>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-10">
             <div className="helix-card p-6">
               <div className="text-[#C9922A] font-bold tracking-[0.22em] text-sm">RIBY INC</div>
-              <div className="text-[10px] tracking-[0.3em] text-[#1A7A6E] font-mono mt-1">UNITED STATES</div>
-              <p className="text-[12px] text-[#9CA3AF] mt-4 leading-relaxed">United States &amp; global operations, buyer coordination and US compliance.</p>
+              <div className="text-[10px] tracking-[0.3em] text-[#1A7A6E] font-mono mt-1">US &amp; GLOBAL</div>
+              <p className="text-[12px] text-[#9CA3AF] mt-4 leading-relaxed">
+                US &amp; Global operations and transaction management. Payment collection entity, escrow custodian,
+                and Delivery Partner of Record for direct-to-consumer shipments.
+              </p>
             </div>
             <div className="helix-card p-6">
-              <div className="text-[#C9922A] font-bold tracking-[0.22em] text-sm">JOMPSTART</div>
-              <div className="text-[10px] tracking-[0.3em] text-[#1A7A6E] font-mono mt-1">DIGITAL LIMITED</div>
-              <p className="text-[12px] text-[#9CA3AF] mt-4 leading-relaxed">Builds &amp; maintains the platform, and extends business credit to exporters against their sales records.</p>
+              <div className="text-[#C9922A] font-bold tracking-[0.22em] text-sm">JOMPSTART DIGITAL</div>
+              <div className="text-[10px] tracking-[0.3em] text-[#1A7A6E] font-mono mt-1">NIGERIA &amp; AFRICA · TECH · CREDIT</div>
+              <p className="text-[12px] text-[#9CA3AF] mt-4 leading-relaxed">
+                Nigeria &amp; Africa ground operations. Builds and maintains the platform and technology integrations.
+                Underwrites and manages Business Credit to suppliers.
+              </p>
             </div>
             <div className="helix-card p-6">
               <div className="text-[#C9922A] font-bold tracking-[0.22em] text-sm">ANCHOR</div>
-              <div className="text-[10px] tracking-[0.3em] text-[#1A7A6E] font-mono mt-1">BANKING PARTNER</div>
-              <p className="text-[12px] text-[#9CA3AF] mt-4 leading-relaxed">Global banking &amp; payment service — NGN, USD accounts, transfers and reconciliation.</p>
+              <div className="text-[10px] tracking-[0.3em] text-[#1A7A6E] font-mono mt-1">BANKING INFRASTRUCTURE</div>
+              <p className="text-[12px] text-[#9CA3AF] mt-4 leading-relaxed">
+                Global Business Banking and Payment Services &mdash; NGN &amp; USD deposit accounts, virtual accounts,
+                transfers, and reconciliation.
+              </p>
             </div>
           </div>
         </div>
@@ -202,12 +207,15 @@ export default function Landing() {
 
       <footer className="border-t border-[#1A7A6E]/15 py-10">
         <div className="max-w-[1400px] mx-auto px-6 lg:px-10 text-center">
-          <div className="text-[12px] text-[#9CA3AF]">Helix Platform — Connecting Africa to the World, One Trade at a Time</div>
+          <div className="text-[12px] text-[#9CA3AF]">Jomp Trade — Connecting Africa to the World, One Trade at a Time</div>
           <div className="text-[11px] text-[#1A7A6E] font-mono tracking-widest mt-3 flex flex-wrap justify-center gap-x-3 gap-y-1">
-            <span>DOBBLEHELIX LIMITED</span><span>·</span>
             <span>RIBY INC</span><span>·</span>
             <span>JOMPSTART DIGITAL LIMITED</span><span>·</span>
             <span>ANCHOR</span>
+          </div>
+          <div className="text-[10px] text-[#6b7280] mt-5 max-w-2xl mx-auto leading-relaxed italic">
+            Riby Inc and JompStart Digital Limited are DobbleHelix Limited companies
+            (<a href="https://dobblehelix.com" className="text-[#9CA3AF] hover:text-[#C9922A]" target="_blank" rel="noopener noreferrer">dobblehelix.com</a> · also known as BusinessLab Africa).
           </div>
         </div>
       </footer>

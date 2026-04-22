@@ -42,9 +42,9 @@ export default function Login() {
   return (
     <AuthShell>
       <div className="w-full max-w-md helix-card p-8 fade-up">
-        <div className="helix-kicker mb-2">Helix · Sign in</div>
+        <div className="helix-kicker mb-2">Jomp Trade · Sign in</div>
         <h1 className="helix-h2">Access your command center</h1>
-        <p className="text-[#9CA3AF] text-sm mt-2">Exporter, buyer, or admin &mdash; one login.</p>
+        <p className="text-[#9CA3AF] text-sm mt-2">Exporter, buyer, consumer, or admin &mdash; one login.</p>
 
         <form onSubmit={submit} className="mt-7 space-y-4" data-testid="login-form">
           <div>
@@ -80,8 +80,8 @@ export default function Login() {
           <div className="text-[#C9922A]">DEMO ACCOUNTS</div>
           <div>exporter@helix.com · Helix@123</div>
           <div>buyer@helix.com · Helix@123</div>
-          <div>admin@helix.com · Helix@123</div>
-          <div>credit@jompstart.com · Helix@123 <span className="text-[#1A7A6E]">(JompStart)</span></div>
+          <div>admin@helix.com · Helix@123 <span className="text-[#1A7A6E]">(Jomp Trade ops)</span></div>
+          <div>credit@jompstart.com · Helix@123 <span className="text-[#1A7A6E]">(JompStart Credit)</span></div>
           <div>shopper@helix.com · Helix@123 <span className="text-[#1A7A6E]">(consumer)</span></div>
         </div>
       </div>
@@ -96,18 +96,18 @@ export function AuthShell({ children }) {
         <div className="absolute inset-0 helix-dot-bg" />
         <div className="relative z-10 flex flex-col justify-between p-10 w-full">
           <Link to="/" className="flex items-center gap-3" data-testid="brand-auth">
-            <div className="w-8 h-8 rounded-sm" style={{ background: "linear-gradient(135deg,#C9922A,#1A7A6E)" }}/>
+            <img src="/jomp-favicon.png" alt="Jomp" className="w-9 h-9 rounded-full"/>
             <div>
-              <div className="font-bold tracking-[0.22em] text-sm">HELIX</div>
-              <div className="text-[10px] tracking-[0.3em] text-[#1A7A6E] font-mono">PLATFORM</div>
+              <div className="font-bold tracking-[0.22em] text-sm">JOMP TRADE</div>
+              <div className="text-[10px] tracking-[0.3em] text-[#1A7A6E] font-mono">EXPORT OS</div>
             </div>
           </Link>
           <div>
             <div className="helix-kicker mb-3">Export Operating System</div>
             <h2 className="helix-h2 max-w-md">One login. Four roles. Every trade in one command center.</h2>
-            <p className="text-[#9CA3AF] mt-4 text-sm max-w-md">Operated by DobbleHelix Limited &amp; Riby Inc · Banking powered by GetAnchor.</p>
+            <p className="text-[#9CA3AF] mt-4 text-sm max-w-md">Riby Inc · JompStart Digital Limited · Anchor.</p>
           </div>
-          <div className="font-mono text-[11px] text-[#1A7A6E] tracking-widest">© 2026 · HELIX v1.0</div>
+          <div className="font-mono text-[11px] text-[#1A7A6E] tracking-widest">© 2026 · JOMP TRADE v1.1</div>
         </div>
       </div>
       <div className="flex-1 flex items-center justify-center p-6">

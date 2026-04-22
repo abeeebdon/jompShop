@@ -12,9 +12,9 @@ export default function ShopShell({ children }) {
       <header className="sticky top-0 z-30 bg-[#0A1628]/95 backdrop-blur border-b border-[#1A7A6E]/20">
         <div className="max-w-[1400px] mx-auto px-6 lg:px-10 py-4 flex items-center justify-between gap-6">
           <Link to="/shop" className="flex items-center gap-3" data-testid="shop-home-link">
-            <div className="w-8 h-8 rounded-sm flex items-center justify-center font-bold text-[#0A1628] text-[13px]" style={{ background: "linear-gradient(135deg,#C9922A,#1A7A6E)" }}>H</div>
+            <img src="/jomp-favicon.png" alt="Jomp" className="w-9 h-9 rounded-full"/>
             <div className="leading-tight">
-              <div className="font-bold tracking-[0.22em] text-sm">HELIX SHOP</div>
+              <div className="font-bold tracking-[0.22em] text-sm">JOMP SHOP</div>
               <div className="text-[9px] tracking-[0.3em] text-[#1A7A6E] font-mono">DIRECT · FROM AFRICA</div>
             </div>
           </Link>

@@ -1,0 +1,64 @@
+{
+  "summary": "Iteration 5 backend validation of escrow-first checkout, quote flow, and admin escrow overview. 19/19 pytest cases pass against the live preview URL. All 13 items in the review request are verified: escrow held on POST /api/shop/orders with no immediate seller credit; consumer confirm-delivery releases escrow (credit 98% + fee 2% txs); seller /delivered path releases identically; idempotent release returns released=false reason='already released'; quote create/respond/checkout/decline flow end-to-end (QTE- prefixed, quoted_total = unit*qty, status transitions pending→quoted→converted or →declined); all three error cases return correct codes (cross-listing 400, cross-consumer 403, pending-quote 400); admin escrow overview returns the expected shape with buyer/exporter 403; JompStart auto-debit fires on escrow release after exporter accepts a disbursed offer; regression OK (≥3 seeded listings, exporter riby_dtc listing creation, credit mine). ONE notable ledger bug discovered: credit_tx.amount is already net of the 2% fee AND a separate fee-type debit is also posted, so the seller's effective USD balance change is total*0.96 rather than the advertised total*0.98. This is a correctness bug in _release_escrow()/finance._balance_for() interaction.",
+  "backend_issues": {
+    "critical": [
+      {
+        "endpoint": "POST /api/shop/orders/{oid}/confirm-delivery and POST /api/shop/orders/{oid}/delivered (via _release_escrow in /app/backend/routes/shop.py:386-416)",
+        "issue": "DOUBLE-COUNTED FEE on seller USD ledger. credit_tx.amount = total - fee (already net of 2%), but a separate fee_tx with type='fee' amount=2% is also inserted. finance._balance_for treats type=='fee' as a debit, so the seller ledger nets to total*0.96 instead of total*0.98. Response body correctly reports credit_amount_usd=total*0.98 and fee_usd=total*0.02, which silently diverges from the actual wallet balance. Demonstrated: $100 escrow release → seller USD delta observed = $96 (expected $98); $50 release → delta $48 (expected $49).",
+        "priority": "HIGH"
+      }
+    ],
+    "minor": [
+      {
+        "endpoint": "POST /api/shop/orders (quote_prepay)",
+        "issue": "Server overwrites qty from payload with q['quantity'] from the quote (shop.py:288). If a consumer passes a different quantity in the checkout payload for a quoted order it is silently ignored instead of 400'ing — safer to reject the mismatch."
+      },
+      {
+        "endpoint": "POST /api/shop/quotes/{qid}/decline",
+        "issue": "Does not validate current status — calling decline on an already-converted quote also returns 200 and silently flips status back to 'declined', which could unwind a paid order's provenance. Should 400 unless status in ('pending','quoted')."
+      },
+      {
+        "endpoint": "POST /api/shop/quotes (no RBAC on consumer identity)",
+        "issue": "Any authenticated user with any role can create a quote. Not a security issue, but exporter/buyer roles create quotes as themselves which pollutes the seller's own quote queue if a seller mistakenly opens the shop. Consider restricting consumer_user_id creation to role in ('consumer','admin')."
+      },
+      {
+        "endpoint": "POST /api/shop/orders/{oid}/delivered and /confirm-delivery",
+        "issue": "order.status is flipped to 'delivered' UNCONDITIONALLY before escrow release is attempted; if escrow was already released the status is rewritten anyway. Harmless but should be inside the 'held' guard for clean state transitions."
+      }
+    ]
+  },
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/test_iteration5_escrow_quotes.py",
+    "/app/test_reports/pytest/pytest_iter5.xml"
+  ],
+  "action_items": [
+    "HIGH: Fix the double-counted-fee ledger bug. Choose ONE of: (a) keep credit_tx at gross (total) and fee_tx at -2% (type='fee' debits 2%, net = 98%); or (b) keep credit_tx at net (total*0.98) and make fee_tx an audit-only record that does not affect balance (e.g. skip type='fee' inside _balance_for, or use a different type like 'fee_record'). Option (a) is more auditable.",
+    "MEDIUM: validate checkout-with-quote quantity equals quote.quantity or reject 400.",
+    "MEDIUM: decline should only be allowed on pending/quoted, not converted/accepted/declined/expired.",
+    "LOW: add a status guard in /delivered and /confirm-delivery before flipping order.status.",
+    "LOW (carry-over iter4): rename transaction_id→disbursement_tx_id in /api/credit/applications/{aid}/accept response; collapse the two sequential update_one calls."
+  ],
+  "critical_code_review_comments": [
+    "shop.py _release_escrow (L380-435): credit_amount=round(total-fee) → credit_tx.amount=credit_amount; fee_tx.amount=fee. But finance._balance_for: type in ('debit','transfer','fee') → bal -= amount. So the fee gets applied TWICE: once as a reduction embedded in the credit, once as an explicit fee debit. Seller receives only 96% in-wallet. This is the most important finding of the review.",
+    "shop.py place_order (L286-290): when payload.quote_id is provided, qty=q['quantity'] overrides payload.quantity silently. Safer: if payload.quantity != q['quantity']: raise 400.",
+    "shop.py decline_quote (L241-249): no status guard — allows transitioning 'converted' → 'declined' after the order has been paid.",
+    "shop.py seller_mark_delivered/consumer_confirm_delivery: status flip to 'delivered' happens before _release_escrow is awaited AND unconditionally. If escrow is already released this is a no-op but still re-writes status; prefer to flip inside the 'held' branch.",
+    "shop.py escrow_overview (L521-535): returns up to 1000 rows then trims to 50 in `recent`. Fine for MVP but should add pagination and server-side limit when holdings grow.",
+    "shop.py create_quote (L144-180): no role check — any authenticated user (including the seller themselves) can submit a quote on any listing. Add role='consumer' / at-least-not-own-business guard.",
+    "shop.py /orders endpoint accepts role in ('consumer','buyer','exporter','admin','super_admin'). Allowing exporter/buyer to checkout as consumers is fine but the quote-from-another-consumer test (buyer using shopper's quote) correctly 403s — good.",
+    "Models: ConsumerOrder.escrow_released_at typed as Optional[str] but stored as an ISO string via _now_iso() — consistent; no datetime JSON leak.",
+    "Mongo: all shop.py reads use projection {_id:0} — no ObjectId leaks observed.",
+    "repayment.auto_debit_on_credit is called in a try/except inside _release_escrow — good defensive posture, escrow release itself is not blocked by auto-debit failure."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iteration5_escrow_quotes.py (new — 19 pytest cases across 8 classes)"
+  ],
+  "success_rate": {"backend": "100% (19/19 pytest pass)", "frontend": "not tested (backend-only per request)"},
+  "test_credentials": "Used /app/memory/test_credentials.md verbatim: admin@helix.com, credit@jompstart.com, exporter@helix.com, buyer@helix.com, shopper@helix.com — all password Helix@123.",
+  "seed_data_creation": "TEST_-prefixed listings (DTC) created under exporter business for each flow — not cleaned up (kept small; next run uses fresh uuids). One credit application (JMP-*) for exporter@helix.com was submitted→offered→accepted→disbursed as part of the auto-debit flow; this generates a repayment schedule and a +disbursement USD credit tx on the exporter ledger — future runs that hit the auto-debit test will keep drawing against that loan. If DB cleanliness is needed before next iteration, drop shop_listings where title starts with TEST_, consumer_orders since this run, quote_requests since this run, and the most recent credit_applications for exporter@helix.com plus its repayment_schedule + debit tx.",
+  "retest_needed": true,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "All 13 review-request items are functionally verified; the only functional gap is the double-counted-fee ledger bug that affects the seller's USD wallet balance by -2% of each order total at escrow release. Response body numbers are correct; only the balance math is off. Once main agent lands the fix, re-run test_iteration5_escrow_quotes.py and additionally assert round(post.usd_balance - pre_usd, 2) == round(total * 0.98, 2) on the two escrow-release tests to confirm.",
+  "rca of the issue": "RCA for double-counted fee: _release_escrow() in /app/backend/routes/shop.py computes fee=total*0.02 and credit_amount=total-fee (i.e. already net). It then inserts TWO transactions: (1) {type:'credit', amount:credit_amount (net)}, (2) {type:'fee', amount:fee}. The finance balance computation in /app/backend/routes/finance.py _balance_for treats type in ('debit','transfer','fee') as a negative contribution to the balance. Therefore the wallet sees (+credit_amount) + (-fee) = (total - fee) - fee = total - 2*fee = total*0.96, not the advertised total*0.98. Reproduction: POST /api/shop/orders as shopper on a $100 DTC listing → POST /api/shop/orders/{oid}/confirm-delivery → response says credit_amount_usd=98 / fee_usd=2, but GET /api/finance/dashboard (as seller) shows usd_balance increased by only $96. Fix options listed in action_items. Recommended fix is (a): record credit_tx at gross (total=100) and keep fee_tx as-is (type='fee', 2) — this makes net exactly 98 and preserves a clean audit trail of the gross inflow + fee debit."
+}
