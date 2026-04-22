@@ -1,0 +1,87 @@
+{
+  "theme": "dark",
+  "archetype": "Performance Pro / Swiss High-Contrast Hybrid (Command Center)",
+  "colors": {
+    "background": "#0A1628",
+    "surface": "#0F2040",
+    "primary": "#C9922A",
+    "secondary": "#1A7A6E",
+    "text_primary": "#F5F5F5",
+    "text_secondary": "#9CA3AF",
+    "text_dark": "#1A1A2E",
+    "border": "rgba(26, 122, 110, 0.2)",
+    "hover_bg": "rgba(26, 122, 110, 0.1)"
+  },
+  "typography": {
+    "fonts": {
+      "heading": "Inter, sans-serif",
+      "body": "Inter, sans-serif",
+      "mono": "'JetBrains Mono', monospace"
+    },
+    "scale": {
+      "h1": "text-4xl sm:text-5xl font-bold tracking-tighter text-[#F5F5F5]",
+      "h2": "text-2xl sm:text-3xl font-semibold tracking-tight text-[#F5F5F5]",
+      "h3": "text-xl sm:text-2xl font-medium tracking-tight text-[#F5F5F5]",
+      "body": "text-base font-normal leading-relaxed text-[#F5F5F5]",
+      "data_large": "font-mono text-3xl sm:text-4xl tracking-tight text-[#C9922A]",
+      "data_small": "font-mono text-sm tracking-wide text-[#1A7A6E]"
+    }
+  },
+  "layout": {
+    "strategy": "Control Room Grid (Dense, Data Correlation)",
+    "container": "w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8",
+    "dashboard_grid": "grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4",
+    "card": "bg-[#0F2040] border border-[#1A7A6E]/20 rounded-lg p-5 flex flex-col h-full",
+    "navigation": "fixed left-0 top-0 h-screen w-16 lg:w-64 bg-[#0A1628] border-r border-[#1A7A6E]/20 flex flex-col transition-all duration-300"
+  },
+  "components": {
+    "button_primary": "bg-[#C9922A] text-[#0A1628] font-bold hover:bg-[#A87B23] hover:text-[#0A1628] transition-colors rounded px-6 py-2 shadow-[0_0_15px_rgba(201,146,42,0.2)]",
+    "button_secondary": "bg-transparent border border-[#1A7A6E] text-[#1A7A6E] hover:bg-[#1A7A6E]/10 hover:text-[#1A7A6E] transition-colors rounded px-6 py-2",
+    "status_tag": "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-mono font-medium bg-[#1A7A6E]/20 text-[#1A7A6E] border border-[#1A7A6E]/30 uppercase tracking-widest",
+    "input": "bg-[#0A1628] border border-[#1A7A6E]/30 text-[#F5F5F5] rounded px-4 py-2 focus:ring-1 focus:ring-[#C9922A] focus:border-[#C9922A] placeholder-[#9CA3AF]",
+    "table_container": "w-full overflow-x-auto rounded border border-[#1A7A6E]/20",
+    "table": "w-full text-left border-collapse",
+    "table_th": "bg-[#0A1628] border-b border-[#1A7A6E]/30 text-xs font-mono text-[#9CA3AF] uppercase tracking-wider py-3 px-4",
+    "table_td": "border-b border-[#1A7A6E]/10 py-3 px-4 text-sm text-[#F5F5F5]",
+    "table_row": "hover:bg-[#1A7A6E]/5 transition-colors"
+  },
+  "visual_enhancements": {
+    "surface_strategy": "The 'Grid Borders' Technical Look. Expose the skeleton. Use 1px solid borders to create a radar/command center feel.",
+    "glassmorphism": "Avoid heavy glass on dashboards. Use flat solid surfaces with sharp borders to prevent visual refraction of financial data.",
+    "hover_states": "Hover states must explicitly set text color. Cards should have slight lift (-translate-y-[1px]) and border color change on hover.",
+    "animations": "Minimalist micro-interactions. Smooth fade transitions for page loads. NO bouncy spring animations."
+  },
+  "image_urls": [
+    {
+      "url": "https://images.pexels.com/photos/12047372/pexels-photo-12047372.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+      "category": "hero_background",
+      "description": "Large cargo ship loaded with colorful containers in open ocean. Use for public landing page hero section."
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1768212566108-4ce4f329e4d2?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1ODB8MHwxfHNlYXJjaHwxfHxmYXNoaW9uJTIwdGV4dGlsZXMlMjBhZnJpY2FufGVufDB8fHx8MTc3NjgyNDU2MHww&ixlib=rb-4.1.0&q=85",
+      "category": "product_textiles",
+      "description": "Colorful African textiles for the Export Catalog / Marketplace."
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1622676566956-b42b50c84c31?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NTJ8MHwxfHNlYXJjaHwzfHxhZ3JpY3VsdHVyZSUyMGZhcm1lciUyMGFmcmljYW58ZW58MHx8fHwxNzc2ODI0NTYxfDA&ixlib=rb-4.1.0&q=85",
+      "category": "product_agriculture",
+      "description": "African agriculture representation for staple foods/products."
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1635220035691-9473364b4476?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NzR8MHwxfHNlYXJjaHwxfHxnZXRhbmNob3IlMjBsb2dvfGVufDB8fHx8MTc3NjgyNDU2MXww&ixlib=rb-4.1.0&q=85",
+      "category": "partner_logo_getanchor",
+      "description": "Blue hexagonal symbol representing GetAnchor banking partner."
+    }
+  ],
+  "instructions_to_main_agent": [
+    "Install required icon library: yarn add @phosphor-icons/react (best for dense dashboards).",
+    "CRITICAL COLOR RULE: strictly follow the variables. --color-navy #0A1628 for main background, --color-gold #C9922A for actions/key metrics, --color-teal #1A7A6E for status/links, and #0F2040 for card surfaces.",
+    "TYPOGRAPHY OVERRIDE: User forced Inter for headings. You MUST use extreme letter-spacing (tracking-tighter) and heavy weights (font-bold) to offset the AI-default look of Inter.",
+    "DATA FORMATTING: All financial data, balances, IDs, transaction hashes, and live exchange rates MUST use JetBrains Mono.",
+    "DASHBOARD LAYOUT: Use 'Control Room' grid layout. Ensure grid items stretch to match heights (h-full). Side navigation is sticky/fixed on the left.",
+    "MARKETING PAGE: The public marketing page should use the same dark theme but allow for larger imagery and parallax scrolling (use Framer Motion).",
+    "ACCESSIBILITY: All interactive elements MUST include a data-testid attribute using kebab-case (e.g., data-testid='withdraw-funds-button').",
+    "COMPONENTS: Use Shadcn components for complex UI (tables, dropdowns, select) but strip their default borders/backgrounds to match our #0F2040 cards and #1A7A6E borders.",
+    "NO PLACEHOLDERS: Use ONLY the image URLs provided in this file. Never use dummyimage.com or via.placeholder.com."
+  ]
+}
