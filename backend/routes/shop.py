@@ -143,9 +143,13 @@ async def delete_listing(lid: str, user: User = Depends(get_current_user)):
 
 @router.post("/quotes")
 async def create_quote(payload: QuoteRequestCreate, user: User = Depends(get_current_user)):
+    if user.role not in ("consumer", "admin", "super_admin"):
+        raise HTTPException(403, "Only consumers can request quotes on Jomp Shop")
     listing = await db.shop_listings.find_one({"id": payload.listing_id}, {"_id": 0})
     if not listing:
         raise HTTPException(404, "Listing not found")
+    if listing["owner_business_id"] == user.business_id:
+        raise HTTPException(400, "You cannot request a quote on your own listing")
     q = QuoteRequest(
         consumer_user_id=user.user_id,
         consumer_email=user.email,
@@ -245,6 +249,8 @@ async def decline_quote(qid: str, user: User = Depends(get_current_user)):
         raise HTTPException(404)
     if q["consumer_user_id"] != user.user_id:
         raise HTTPException(403)
+    if q["status"] not in ("pending", "quoted"):
+        raise HTTPException(400, f"Cannot decline a quote in status '{q['status']}'")
     await db.quote_requests.update_one({"id": qid}, {"$set": {"status": "declined", "updated_at": _now_iso()}})
     return {"status": "declined"}
 
@@ -284,6 +290,8 @@ async def place_order(payload: ConsumerOrderCreate, user: User = Depends(get_cur
             raise HTTPException(400, f"Quote not ready (status: {q['status']})")
         if q.get("quote_valid_until") and q["quote_valid_until"] < datetime.now(timezone.utc).date().isoformat():
             raise HTTPException(400, "Quote has expired")
+        if payload.quantity != q["quantity"]:
+            raise HTTPException(400, f"Quantity mismatch — quote is for {q['quantity']} units, checkout requested {payload.quantity}")
         unit_price = q["quoted_unit_price_usd"]
         qty = q["quantity"]
         checkout_mode = "quote_prepay"
@@ -378,26 +386,30 @@ async def place_order(payload: ConsumerOrderCreate, user: User = Depends(get_cur
 
 
 async def _release_escrow(order: dict, triggered_by: str) -> dict:
-    """Release held escrow to seller → credit USD (net of 2% fee). Idempotent."""
+    """Release held escrow to seller → credit USD (gross) + fee debit (2%). Idempotent.
+
+    Ledger: credit_tx records the gross inflow (total_usd) and a separate fee_tx
+    debits the 2% marketplace fee, so seller's net USD balance delta is exactly total * 0.98.
+    """
     if order["escrow_status"] != "held":
         return {"released": False, "reason": "already released"}
 
     total = float(order["total_usd"])
     fee = round(total * PLATFORM_FEE_RATE, 2)
-    credit_amount = round(total - fee, 2)
+    net_amount = round(total - fee, 2)
     seller_biz_id = order["seller_business_id"]
 
-    # credit + fee transactions
+    # credit_tx = gross inflow; fee_tx = -2% marketplace fee debit.
     credit_tx = {
         "id": str(uuid.uuid4()),
         "business_id": seller_biz_id,
         "anchor_transaction_ref": f"escrow_rel_{uuid.uuid4().hex[:12]}",
         "type": "credit",
-        "amount": credit_amount,
+        "amount": total,
         "currency": "USD",
         "status": "completed",
         "anchor_event_type": "escrow.released",
-        "description": f"Escrow release · {order['order_number']} (net of 2% marketplace fee)",
+        "description": f"Escrow release · {order['order_number']} (gross)",
         "counterparty": ESCROW_HOLDER,
         "timestamp": _now_iso(),
     }
@@ -417,7 +429,7 @@ async def _release_escrow(order: dict, triggered_by: str) -> dict:
 
     await db.consumer_orders.update_one(
         {"id": order["id"]},
-        {"$set": {"escrow_status": "released", "escrow_released_at": _now_iso()}},
+        {"$set": {"status": "delivered", "escrow_status": "released", "escrow_released_at": _now_iso()}},
     )
     await db.escrow_holdings.update_one(
         {"order_id": order["id"]},
@@ -431,8 +443,8 @@ async def _release_escrow(order: dict, triggered_by: str) -> dict:
     except Exception as e:
         log.exception("auto-debit failed: %s", e)
 
-    log.info("escrow released: order=%s amount=%s fee=%s triggered_by=%s", order["order_number"], credit_amount, fee, triggered_by)
-    return {"released": True, "credit_amount_usd": credit_amount, "fee_usd": fee, "jompstart_auto_debit": debit}
+    log.info("escrow released: order=%s gross=%s net=%s fee=%s triggered_by=%s", order["order_number"], total, net_amount, fee, triggered_by)
+    return {"released": True, "credit_amount_usd": net_amount, "gross_amount_usd": total, "fee_usd": fee, "jompstart_auto_debit": debit}
 
 
 @router.get("/orders/mine")
@@ -483,8 +495,7 @@ async def seller_mark_delivered(oid: str, user: User = Depends(get_current_user)
         raise HTTPException(404)
     if o["seller_business_id"] != user.business_id and user.role not in ("admin", "super_admin"):
         raise HTTPException(403)
-    await db.consumer_orders.update_one({"id": oid}, {"$set": {"status": "delivered"}})
-    o = await db.consumer_orders.find_one({"id": oid}, {"_id": 0})
+    # Status flip happens inside _release_escrow (only when escrow was 'held')
     release = await _release_escrow(o, triggered_by=f"seller:{user.user_id}")
     return {"status": "ok", **release}
 
@@ -497,8 +508,6 @@ async def consumer_confirm_delivery(oid: str, user: User = Depends(get_current_u
         raise HTTPException(404)
     if o["consumer_user_id"] != user.user_id:
         raise HTTPException(403)
-    await db.consumer_orders.update_one({"id": oid}, {"$set": {"status": "delivered"}})
-    o = await db.consumer_orders.find_one({"id": oid}, {"_id": 0})
     release = await _release_escrow(o, triggered_by=f"consumer:{user.user_id}")
     return {"status": "ok", **release}
 

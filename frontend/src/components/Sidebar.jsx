@@ -52,7 +52,7 @@ export default function Sidebar() {
   return (
     <aside className="fixed left-0 top-0 h-screen w-16 lg:w-60 bg-[#0A1628] border-r border-[#1A7A6E]/20 flex flex-col z-40">
       <div className="px-4 lg:px-6 py-5 border-b border-[#1A7A6E]/15 flex items-center gap-2">
-        <img src="/jomp-favicon.png" alt="Jomp" className="w-8 h-8 rounded-full"/>
+        <img src="/jomp-icon.png" alt="Jomp" className="w-8 h-8 rounded-full"/>
         <div className="hidden lg:flex flex-col leading-tight">
           <span className="font-bold tracking-[0.2em] text-[13px]">JOMP TRADE</span>
           <span className="text-[9px] tracking-[0.3em] text-[#1A7A6E] font-mono">EXPORT OS v1.1</span>

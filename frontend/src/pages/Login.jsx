@@ -96,7 +96,7 @@ export function AuthShell({ children }) {
         <div className="absolute inset-0 helix-dot-bg" />
         <div className="relative z-10 flex flex-col justify-between p-10 w-full">
           <Link to="/" className="flex items-center gap-3" data-testid="brand-auth">
-            <img src="/jomp-favicon.png" alt="Jomp" className="w-9 h-9 rounded-full"/>
+            <img src="/jomp-icon.png" alt="Jomp" className="w-9 h-9 rounded-full"/>
             <div>
               <div className="font-bold tracking-[0.22em] text-sm">JOMP TRADE</div>
               <div className="text-[10px] tracking-[0.3em] text-[#1A7A6E] font-mono">EXPORT OS</div>

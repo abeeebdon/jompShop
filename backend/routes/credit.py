@@ -185,12 +185,7 @@ async def accept_offer(aid: str, user: User = Depends(get_current_user)):
         raise HTTPException(403)
     if doc["status"] != "offered":
         raise HTTPException(400, "No offer to accept")
-    tl = doc["timeline"] + [{"at": _now_iso(), "event": "offer_accepted", "by": user.user_id}]
-    await db.credit_applications.update_one(
-        {"id": aid},
-        {"$set": {"status": "accepted", "timeline": tl, "updated_at": _now_iso()}},
-    )
-
+    now = _now_iso()
     # Simulate disbursement: credit supplier USD account (mock Anchor book transfer)
     tx_id = str(uuid.uuid4())
     await db.transactions.insert_one({
@@ -204,15 +199,20 @@ async def accept_offer(aid: str, user: User = Depends(get_current_user)):
         "anchor_event_type": "jompstart.credit.disbursed",
         "description": f"JompStart credit disbursement · {doc['application_number']}",
         "counterparty": "JompStart Digital",
-        "timestamp": _now_iso(),
+        "timestamp": now,
     })
+    tl = doc["timeline"] + [
+        {"at": now, "event": "offer_accepted", "by": user.user_id},
+        {"at": now, "event": "disbursed", "by": "jompstart_system"},
+    ]
     await db.credit_applications.update_one(
         {"id": aid},
         {"$set": {
             "status": "disbursed",
-            "disbursed_at": _now_iso(),
+            "disbursed_at": now,
             "disbursement_tx_id": tx_id,
-            "timeline": tl + [{"at": _now_iso(), "event": "disbursed", "by": "jompstart_system"}],
+            "timeline": tl,
+            "updated_at": now,
         }},
     )
     # Generate repayment schedule
@@ -223,7 +223,7 @@ async def accept_offer(aid: str, user: User = Depends(get_current_user)):
         # don't block accept on schedule generation
         import logging
         logging.getLogger("helix.credit").exception("schedule gen failed: %s", e)
-    return {"status": "disbursed", "transaction_id": tx_id, "amount_usd": doc["offered_amount_usd"]}
+    return {"status": "disbursed", "disbursement_tx_id": tx_id, "amount_usd": doc["offered_amount_usd"]}
 
 
 # ---------- repayment ----------

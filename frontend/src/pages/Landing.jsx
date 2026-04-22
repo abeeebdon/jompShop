@@ -2,6 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ArrowRight, Globe, ShieldCheck, CurrencyCircleDollar, Package, ChartLineUp, Lightning } from "@phosphor-icons/react";
 import { useAuth } from "../lib/auth-context";
+import ThemeToggle from "../components/ThemeToggle";
 
 const CARGO_IMG = "https://images.pexels.com/photos/12047372/pexels-photo-12047372.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940";
 const TEXTILE_IMG = "https://images.unsplash.com/photo-1768212566108-4ce4f329e4d2?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1ODB8MHwxfHNlYXJjaHwxfHxmYXNoaW9uJTIwdGV4dGlsZXMlMjBhZnJpY2FufGVufDB8fHx8MTc3NjgyNDU2MHww&ixlib=rb-4.1.0&q=85";
@@ -23,7 +24,7 @@ export default function Landing() {
       <header className="fixed top-0 inset-x-0 z-30 bg-[#0A1628]/85 backdrop-blur border-b border-[#1A7A6E]/15">
         <div className="max-w-[1400px] mx-auto px-6 lg:px-10 py-4 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3" data-testid="brand-link">
-            <img src="/jomp-favicon.png" alt="Jomp" className="w-9 h-9 rounded-full"/>
+            <img src="/jomp-icon.png" alt="Jomp" className="w-9 h-9 rounded-full"/>
             <div className="leading-tight">
               <div className="font-bold tracking-[0.22em] text-sm">JOMP TRADE</div>
               <div className="text-[10px] tracking-[0.3em] text-[#1A7A6E] font-mono">EXPORT OS</div>
@@ -36,6 +37,7 @@ export default function Landing() {
             <a href="#partners" className="hover:text-[#F5F5F5]">Partners</a>
           </nav>
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             <Link to="/login" data-testid="login-link" className="text-[13px] text-[#9CA3AF] hover:text-[#F5F5F5]">Sign in</Link>
             <Link to="/register" data-testid="register-cta" className="helix-btn-primary text-sm">Get Started</Link>
           </div>

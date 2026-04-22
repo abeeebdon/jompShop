@@ -1,4 +1,5 @@
 import Sidebar from "./Sidebar";
+import ThemeToggle from "./ThemeToggle";
 
 export default function Shell({ children, title, kicker, actions }) {
   return (
@@ -11,7 +12,10 @@ export default function Shell({ children, title, kicker, actions }) {
               {kicker && <div className="helix-kicker mb-2" data-testid="page-kicker">{kicker}</div>}
               <h1 className="helix-h2" data-testid="page-title">{title}</h1>
             </div>
-            {actions && <div className="flex items-center gap-3 flex-wrap">{actions}</div>}
+            <div className="flex items-center gap-3 flex-wrap">
+              {actions}
+              <ThemeToggle />
+            </div>
           </div>
         </header>
         <main className="max-w-[1400px] mx-auto px-6 lg:px-10 py-8 fade-up">

@@ -38,7 +38,7 @@ export default function Shop() {
       <section className="mb-10 relative">
         <div className="helix-card p-8 md:p-12 relative overflow-hidden">
           <div className="absolute -top-20 -right-20 w-96 h-96 rounded-full bg-[#C9922A]/10 blur-3xl pointer-events-none"/>
-          <div className="helix-kicker mb-3">Helix Shop · From Africa, to your door</div>
+          <div className="helix-kicker mb-3">Jomp Shop · From Africa, to your door</div>
           <h1 className="helix-h1 max-w-3xl">Shop direct from verified African makers &amp; US warehouses.</h1>
           <p className="text-[15px] text-[#9CA3AF] mt-5 max-w-2xl leading-relaxed">
             Two ways to buy: pick from our US-stocked warehouse inventory for 48-hour delivery,

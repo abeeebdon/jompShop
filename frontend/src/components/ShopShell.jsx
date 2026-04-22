@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../lib/auth-context";
 import { Handbag, SignOut, UserCircle } from "@phosphor-icons/react";
+import ThemeToggle from "./ThemeToggle";
 
 /** Minimal top-bar shell for the consumer shop experience (no left rail). */
 export default function ShopShell({ children }) {
@@ -12,7 +13,7 @@ export default function ShopShell({ children }) {
       <header className="sticky top-0 z-30 bg-[#0A1628]/95 backdrop-blur border-b border-[#1A7A6E]/20">
         <div className="max-w-[1400px] mx-auto px-6 lg:px-10 py-4 flex items-center justify-between gap-6">
           <Link to="/shop" className="flex items-center gap-3" data-testid="shop-home-link">
-            <img src="/jomp-favicon.png" alt="Jomp" className="w-9 h-9 rounded-full"/>
+            <img src="/jomp-icon.png" alt="Jomp" className="w-9 h-9 rounded-full"/>
             <div className="leading-tight">
               <div className="font-bold tracking-[0.22em] text-sm">JOMP SHOP</div>
               <div className="text-[9px] tracking-[0.3em] text-[#1A7A6E] font-mono">DIRECT · FROM AFRICA</div>
@@ -25,6 +26,7 @@ export default function ShopShell({ children }) {
             {user && <Link to="/shop/orders" className="hover:text-[#F5F5F5]" data-testid="my-orders-link"><Handbag size={14} className="inline mr-1"/>My Orders</Link>}
           </nav>
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             {user ? (
               <>
                 <span className="hidden sm:inline text-[12px] text-[#9CA3AF]">Hi, {user.name.split(" ")[0]}</span>
@@ -42,9 +44,9 @@ export default function ShopShell({ children }) {
       <main className="max-w-[1400px] mx-auto px-6 lg:px-10 py-8 fade-up">{children}</main>
       <footer className="border-t border-[#1A7A6E]/15 py-8 mt-10">
         <div className="max-w-[1400px] mx-auto px-6 lg:px-10 text-center">
-          <div className="text-[12px] text-[#9CA3AF]">Helix Shop — Direct-from-Africa commerce, powered by the Helix Platform.</div>
+          <div className="text-[12px] text-[#9CA3AF]">Jomp Shop — Direct-from-Africa commerce, powered by the Jomp Trade platform.</div>
           <div className="text-[11px] text-[#1A7A6E] font-mono tracking-widest mt-3 flex flex-wrap justify-center gap-x-3 gap-y-1">
-            <span>DOBBLEHELIX LIMITED</span><span>·</span><span>RIBY INC</span><span>·</span><span>JOMPSTART DIGITAL</span><span>·</span><span>ANCHOR</span>
+            <span>JOMP TRADE · POWERED BY</span><span>·</span><span>RIBY INC</span><span>·</span><span>JOMPSTART DIGITAL</span><span>·</span><span>ANCHOR</span>
           </div>
         </div>
       </footer>

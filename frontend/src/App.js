@@ -2,6 +2,7 @@ import "@/App.css";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { Toaster } from "sonner";
 import { AuthProvider } from "./lib/auth-context";
+import { ThemeProvider } from "./lib/theme-context";
 import Protected from "./components/Protected";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
@@ -68,16 +69,17 @@ function App() {
   return (
     <div className="App">
       <BrowserRouter>
-        <AuthProvider>
-          <AppRouter />
-          <Toaster
-            position="top-right"
-            theme="dark"
-            toastOptions={{
-              style: { background: "#0F2040", color: "#F5F5F5", border: "1px solid rgba(26,122,110,0.3)" },
-            }}
-          />
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <AppRouter />
+            <Toaster
+              position="top-right"
+              toastOptions={{
+                style: { background: "var(--helix-surface)", color: "var(--helix-text)", border: "1px solid var(--helix-border)" },
+              }}
+            />
+          </AuthProvider>
+        </ThemeProvider>
       </BrowserRouter>
     </div>
   );

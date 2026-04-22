@@ -1,0 +1,41 @@
+{
+  "summary": "Iteration 6 — verified all 4 fixes flagged in iter5 + P2 credit rename + frontend light/dark theme + per-product unique images. Backend: 29/29 pytest pass (19 iter5 regression + 10 new iter6 assertions). P0 LEDGER FIX CONFIRMED: credit_tx now recorded at gross (total) and fee_tx as separate 2% debit, so seller net per order = total*0.98 exactly (verified $89→credit 89 + fee -1.78 = 87.22; $50→credit 50 + fee -1 = 49.00). Response body now also returns gross_amount_usd=total. Quote-prepay quantity mismatch correctly 400s. Quote decline correctly 400s on converted/already-declined. Quote RBAC correctly 403s for exporter/buyer roles. Credit accept response now contains 'disbursement_tx_id' and legacy 'transaction_id' key removed. Idempotent release returns {released:false, reason:'already released'}; order.status flips to 'delivered' only on the held→released transition. Full JompStart auto-debit escrow-release flow still works end-to-end. Frontend: ThemeToggle (data-testid='theme-toggle') present on /, /shop, /dashboard; flips documentElement.dataset.theme dark↔light, persists to localStorage key 'jomp-theme', body bg flips rgb(10,22,40) navy ↔ rgb(255,255,255) white, accent flips from gold to Jomp orange (#F39C12). Favicon + sidebar + landing + login all now use /jomp-icon.png (no references to jomp-favicon.png detected in DOM). All 3 seeded /shop listings render an <img> with non-empty unsplash src, each unique (Adire Scarf, Shea Butter, Ofada Rice 5kg), all naturalWidth=900 (no 404s).",
+  "backend_issues": {"critical": [], "minor": [
+    {"endpoint": "POST /api/shop/listings (no photos)", "issue": "If photos=[] or omitted, the created listing is still visible on /shop and the card renders a broken <img> tag (empty src). Recommend either require photos at validation time OR render a placeholder image when photos is empty. Only noticed because TEST_ fixtures have no photos."}
+  ]},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "/shop", "issues": ["Listings with empty photos[] render a broken image placeholder inside the product card (see TEST_iter6 cards). Consider adding a default fallback image in the card component when photos[0] is missing."]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration6_fixes.py",
+    "/app/backend/tests/test_iteration5_escrow_quotes.py",
+    "/app/test_reports/pytest/pytest_iter6.xml"
+  ],
+  "action_items": [
+    "LOW: Render placeholder image in shop listing card when photos is empty, or enforce photos required on POST /api/shop/listings validation. Not a regression — only affects future user-created listings that omit images."
+  ],
+  "critical_code_review_comments": [
+    "shop.py _release_escrow fix verified: credit_tx.amount = total (gross), fee_tx.amount = total*0.02 (type='fee' debit), net effect = 0.98 via finance._balance_for. Response body extended with gross_amount_usd. Good.",
+    "shop.py place_order: quote_id path now validates payload.quantity == quote.quantity → 400 on mismatch. Good.",
+    "shop.py decline_quote: now checks status in ('pending','quoted') → 400 otherwise. Verified with converted and already-declined states.",
+    "shop.py create_quote: role guard now enforces consumer/admin only; exporter/buyer→403. Verified.",
+    "credit.py accept_offer: single update_one that transitions offered→disbursed atomically, and response key is disbursement_tx_id (not transaction_id). Verified.",
+    "Frontend ThemeProvider correctly initializes from localStorage ('jomp-theme') and document.documentElement.dataset.theme. CSS variables/overrides on [data-theme='light'] flip background + accents. Good.",
+    "Landing, Shell, ShopShell, Login all reference /jomp-icon.png consistently. jomp-favicon.png is no longer referenced in the loaded DOM (asset file still exists but unused).",
+    "Minor code smell (pre-existing, not blocking): shop listing card does not guard against empty photos[] — renders <img src='' /> which shows as broken. Low priority UX polish."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iteration6_fixes.py (new — 10 pytest cases covering the 4 iter5 fixes + credit rename, with per-order ledger-delta assertion to isolate from concurrent JompStart auto-debit)"
+  ],
+  "success_rate": {"backend": "100% (29/29 pytest pass across iter5+iter6 suites)", "frontend": "100% on theme toggle (3 pages), favicon/logo usage, and seeded product image rendering"},
+  "test_credentials": "Used /app/memory/test_credentials.md verbatim — admin@helix.com, exporter@helix.com, buyer@helix.com, shopper@helix.com, credit@jompstart.com (all Helix@123).",
+  "seed_data_creation": "Created ~13 TEST_iter6-* DTC listings under exporter business (no photos — see minor issue above). Submitted 1 additional JMP credit app for exporter (offered→accepted→disbursed) for accept-response field test. These accumulate but are namespaced with TEST_ prefix for easy cleanup. No DB drop performed.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "All 13 items in iter6 review request verified green. The only remaining advisory: shop listing card should render a placeholder when photos=[] (pure frontend polish). Suite at /app/backend/tests/test_iteration6_fixes.py is the authoritative regression — uses per-order credit-minus-fee math (not raw wallet delta) to avoid flakiness when JompStart auto-debit fires in the same release cycle.",
+  "rca of the issue": "N/A — iter5 ledger bug has been fixed at the source. Verified via (a) response contract (credit_amount_usd/gross_amount_usd/fee_usd), (b) per-order ledger isolation (credit_tx.amount == gross, fee_tx.amount == 2%, net = 98%), (c) end-to-end test via /confirm-delivery and /delivered paths on $89 and $50 orders. Idempotency and status-transition semantics remain intact."
+}

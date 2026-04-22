@@ -2,10 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ---- Helix Platform Global Styles ---- */
+/* ---- Jomp Trade Global Styles ---- */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 :root {
+    /* -------- Dark theme (default) -------- */
     --helix-navy: #0A1628;
     --helix-surface: #0F2040;
     --helix-gold: #C9922A;
@@ -16,7 +17,11 @@
     --helix-text-dim: #9CA3AF;
     --helix-dark: #1A1A2E;
     --helix-border: rgba(26, 122, 110, 0.22);
+    --helix-border-soft: rgba(26, 122, 110, 0.08);
+    --helix-hover: rgba(26, 122, 110, 0.05);
     --helix-danger: #E74C3C;
+    --helix-dot: rgba(26, 122, 110, 0.18);
+    --jomp-ring: rgba(201, 146, 42, 0.18);
 
     /* shadcn mapping to our dark theme */
     --background: 217 52% 10%;
@@ -41,6 +46,45 @@
     --radius: 0.375rem;
 }
 
+/* -------- Light theme · Jomp Icon palette (purple + orange + white) -------- */
+[data-theme="light"] {
+    --helix-navy: #FFFFFF;           /* app background */
+    --helix-surface: #FFFDF7;        /* card surface (soft off-white) */
+    --helix-gold: #F39C12;           /* primary accent -> Jomp orange */
+    --helix-gold-dim: #C77F0A;
+    --helix-teal: #4A2E8A;           /* secondary accent -> Jomp purple */
+    --helix-teal-dim: rgba(74, 46, 138, 0.12);
+    --helix-text: #1F1B2E;           /* primary text -> deep purple-black */
+    --helix-text-dim: #6B6680;
+    --helix-dark: #F3EFFA;
+    --helix-border: rgba(74, 46, 138, 0.18);
+    --helix-border-soft: rgba(74, 46, 138, 0.06);
+    --helix-hover: rgba(243, 156, 18, 0.06);
+    --helix-danger: #E74C3C;
+    --helix-dot: rgba(74, 46, 138, 0.14);
+    --jomp-ring: rgba(243, 156, 18, 0.22);
+
+    --background: 0 0% 100%;
+    --foreground: 260 24% 14%;
+    --card: 42 60% 98%;
+    --card-foreground: 260 24% 14%;
+    --popover: 42 60% 98%;
+    --popover-foreground: 260 24% 14%;
+    --primary: 36 91% 52%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 260 51% 36%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 260 20% 96%;
+    --muted-foreground: 258 10% 44%;
+    --accent: 260 51% 36%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 78% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 260 40% 85%;
+    --input: 260 20% 92%;
+    --ring: 36 91% 52%;
+}
+
 html, body, #root {
     background: var(--helix-navy);
     color: var(--helix-text);
@@ -59,7 +103,7 @@ html, body, #root {
 /* scrollbar */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: var(--helix-navy); }
-::-webkit-scrollbar-thumb { background: rgba(26, 122, 110, 0.4); border-radius: 2px; }
+::-webkit-scrollbar-thumb { background: var(--helix-teal-dim); border-radius: 2px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--helix-teal); }
 
 /* utility classes */
@@ -70,7 +114,7 @@ html, body, #root {
     border-radius: 6px;
 }
 .helix-card:hover {
-    border-color: rgba(26, 122, 110, 0.5);
+    border-color: var(--helix-teal);
     transform: translateY(-1px);
     transition: all 180ms ease;
 }
@@ -81,12 +125,13 @@ html, body, #root {
     padding: 10px 22px;
     border-radius: 4px;
     transition: all 150ms ease;
-    box-shadow: 0 0 18px rgba(201, 146, 42, 0.18);
+    box-shadow: 0 0 18px var(--jomp-ring);
 }
 .helix-btn-primary:hover:not(:disabled) {
     background: var(--helix-gold-dim);
     transform: translateY(-1px);
 }
+[data-theme="light"] .helix-btn-primary { color: #FFFFFF; }
 .helix-btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
 
 .helix-btn-secondary {
@@ -99,7 +144,7 @@ html, body, #root {
     transition: all 150ms ease;
 }
 .helix-btn-secondary:hover {
-    background: rgba(26, 122, 110, 0.12);
+    background: var(--helix-teal-dim);
 }
 
 .helix-input {
@@ -111,6 +156,7 @@ html, body, #root {
     width: 100%;
     font-size: 14px;
 }
+[data-theme="light"] .helix-input { background: #FFFFFF; }
 .helix-input:focus {
     outline: none;
     border-color: var(--helix-gold);
@@ -165,14 +211,14 @@ html, body, #root {
 }
 .helix-table tbody td {
     padding: 14px 16px;
-    border-bottom: 1px solid rgba(26, 122, 110, 0.08);
+    border-bottom: 1px solid var(--helix-border-soft);
     font-size: 14px;
     color: var(--helix-text);
 }
-.helix-table tbody tr:hover { background: rgba(26, 122, 110, 0.05); }
+.helix-table tbody tr:hover { background: var(--helix-hover); }
 
 .helix-dot-bg {
-    background-image: radial-gradient(rgba(26, 122, 110, 0.18) 1px, transparent 1px);
+    background-image: radial-gradient(var(--helix-dot) 1px, transparent 1px);
     background-size: 28px 28px;
     background-position: 0 0;
 }
@@ -236,3 +282,85 @@ input, textarea, select {
 .App { min-height: 100vh; }
 
 [data-debug-wrapper="true"] { display: contents !important; }
+
+
+/* ============================================================
+   Light-mode overrides for Tailwind arbitrary-color utilities.
+   These remap the hardcoded hex values used throughout pages
+   so the entire UI flips when data-theme="light" is set.
+   ============================================================ */
+[data-theme="light"] .bg-\[\#0A1628\],
+[data-theme="light"] .bg-\[\#0A1628\]\/95 { background-color: #FFFFFF !important; }
+[data-theme="light"] .bg-\[\#0A1628\]\/95.backdrop-blur { background-color: rgba(255, 255, 255, 0.92) !important; }
+[data-theme="light"] .bg-\[\#0F2040\] { background-color: #FFFDF7 !important; }
+[data-theme="light"] .bg-\[\#1A1A2E\] { background-color: #F3EFFA !important; }
+
+[data-theme="light"] .text-\[\#F5F5F5\] { color: #1F1B2E !important; }
+[data-theme="light"] .text-\[\#9CA3AF\] { color: #6B6680 !important; }
+[data-theme="light"] .text-\[\#C9922A\] { color: #F39C12 !important; }
+[data-theme="light"] .text-\[\#1A7A6E\] { color: #4A2E8A !important; }
+[data-theme="light"] .text-\[\#0A1628\] { color: #FFFFFF !important; }
+
+[data-theme="light"] .border-\[\#C9922A\],
+[data-theme="light"] .border-\[\#C9922A\]\/40,
+[data-theme="light"] .border-\[\#C9922A\]\/60 { border-color: #F39C12 !important; }
+[data-theme="light"] .border-\[\#1A7A6E\],
+[data-theme="light"] .border-\[\#1A7A6E\]\/15,
+[data-theme="light"] .border-\[\#1A7A6E\]\/20,
+[data-theme="light"] .border-\[\#1A7A6E\]\/30,
+[data-theme="light"] .border-\[\#1A7A6E\]\/40,
+[data-theme="light"] .border-\[\#1A7A6E\]\/50,
+[data-theme="light"] .border-\[\#1A7A6E\]\/60 { border-color: rgba(74, 46, 138, 0.25) !important; }
+
+[data-theme="light"] .bg-\[\#C9922A\] { background-color: #F39C12 !important; }
+[data-theme="light"] .bg-\[\#C9922A\]\/8,
+[data-theme="light"] .bg-\[\#C9922A\]\/10,
+[data-theme="light"] .bg-\[\#C9922A\]\/12,
+[data-theme="light"] .bg-\[\#C9922A\]\/15 { background-color: rgba(243, 156, 18, 0.12) !important; }
+[data-theme="light"] .bg-\[\#1A7A6E\] { background-color: #4A2E8A !important; }
+[data-theme="light"] .bg-\[\#1A7A6E\]\/5,
+[data-theme="light"] .bg-\[\#1A7A6E\]\/8,
+[data-theme="light"] .bg-\[\#1A7A6E\]\/10,
+[data-theme="light"] .bg-\[\#1A7A6E\]\/12,
+[data-theme="light"] .bg-\[\#1A7A6E\]\/15,
+[data-theme="light"] .bg-\[\#1A7A6E\]\/20 { background-color: rgba(74, 46, 138, 0.08) !important; }
+
+[data-theme="light"] .hover\:text-\[\#F5F5F5\]:hover { color: #1F1B2E !important; }
+[data-theme="light"] .hover\:border-\[\#1A7A6E\]:hover,
+[data-theme="light"] .hover\:border-\[\#1A7A6E\]\/60:hover { border-color: #4A2E8A !important; }
+
+/* status pills — tune for light background readability */
+[data-theme="light"] .helix-status-ok       { color: #267d6e; background: rgba(74, 46, 138, 0.06); border-color: rgba(74, 46, 138, 0.35); }
+[data-theme="light"] .helix-status-warn     { color: #b46a00; background: rgba(243, 156, 18, 0.1); border-color: rgba(243, 156, 18, 0.5); }
+[data-theme="light"] .helix-status-danger   { color: #b22b1f; background: rgba(231, 76, 60, 0.08); border-color: rgba(231, 76, 60, 0.45); }
+[data-theme="light"] .helix-status-neutral  { color: #6B6680; background: rgba(74, 46, 138, 0.05); border-color: rgba(74, 46, 138, 0.25); }
+[data-theme="light"] .helix-status-gold     { color: #b46a00; background: rgba(243, 156, 18, 0.08); border-color: rgba(243, 156, 18, 0.4); }
+
+/* sonner toaster */
+[data-theme="light"] [data-sonner-toast] {
+    background: #FFFFFF !important;
+    color: #1F1B2E !important;
+    border: 1px solid rgba(74, 46, 138, 0.18) !important;
+}
+
+/* selection */
+[data-theme="light"] ::selection { background: #F39C12; color: #FFFFFF; }
+
+/* Jomp theme toggle button */
+.jomp-theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px; height: 32px;
+    border-radius: 999px;
+    border: 1px solid var(--helix-border);
+    background: transparent;
+    color: var(--helix-text-dim);
+    cursor: pointer;
+    transition: all 160ms ease;
+}
+.jomp-theme-toggle:hover {
+    color: var(--helix-gold);
+    border-color: var(--helix-gold);
+    background: var(--jomp-ring);
+}
