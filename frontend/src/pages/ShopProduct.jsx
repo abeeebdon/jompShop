@@ -27,6 +27,8 @@ export default function ShopProduct() {
   }, [params]);
 
   if (!l) return <ShopShell><div className="text-[#9CA3AF]">Loading…</div></ShopShell>;
+  const FALLBACK_IMG = "https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?auto=format&fit=crop&w=900&q=80";
+  const heroPhoto = l.photos?.[0] || FALLBACK_IMG;
   const isDtc = l.fulfillment_mode === "riby_dtc";
   const effectiveUnit = quote?.quoted_unit_price_usd || l.retail_price_usd;
   const totalDisplay = effectiveUnit * qty;
@@ -60,7 +62,7 @@ export default function ShopProduct() {
         <div className="lg:col-span-3">
           <div className="helix-card overflow-hidden">
             <div className="aspect-[4/3] bg-[#0A1628]">
-              <img src={l.photos?.[0]} alt={l.title} className="w-full h-full object-cover"/>
+              <img src={heroPhoto} alt={l.title} onError={(e)=>{ if (e.currentTarget.src !== FALLBACK_IMG) e.currentTarget.src = FALLBACK_IMG; }} className="w-full h-full object-cover"/>
             </div>
             <div className="p-6">
               <div className="flex flex-wrap gap-2 mb-4">

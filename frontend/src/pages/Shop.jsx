@@ -87,12 +87,15 @@ export default function Shop() {
   );
 }
 
+const FALLBACK_IMG = "https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?auto=format&fit=crop&w=900&q=80";
+
 function ListingCard({ l }) {
   const isDtc = l.fulfillment_mode === "riby_dtc";
+  const photo = l.photos?.[0] || FALLBACK_IMG;
   return (
     <Link to={`/shop/product/${l.id}`} data-testid={`listing-${l.id}`} className="helix-card group overflow-hidden flex flex-col">
       <div className="aspect-[4/3] relative overflow-hidden">
-        <img src={l.photos?.[0]} alt={l.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+        <img src={photo} alt={l.title} onError={(e)=>{ if (e.currentTarget.src !== FALLBACK_IMG) e.currentTarget.src = FALLBACK_IMG; }} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
         <div className="absolute top-2 left-2">
           {isDtc ? (
             <span className="helix-status helix-status-gold"><Truck size={10}/> Direct · Riby of Record</span>

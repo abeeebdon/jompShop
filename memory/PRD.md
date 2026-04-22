@@ -1,7 +1,7 @@
-# Helix Platform — PRD (Internal Living Doc)
+# Jomp Trade — PRD (Internal Living Doc)
 
 ## 1. Original Problem Statement
-Build a web-based SaaS — the Helix Platform — a unified export management, compliance, and cross-border financial transactions platform for Nigerian / African businesses trading with the United States. Banking partner: GetAnchor (`getanchor.co`). Operated by DobbleHelix Limited (Nigeria) and Riby Inc (US). Focus sectors: fashion & textiles, agriculture, staple foods, general goods.
+Build a web-based SaaS — originally the Helix Platform, now rebranded to **Jomp Trade** — a unified export management, compliance, and cross-border financial transactions platform for Nigerian / African businesses trading with the United States. Banking partner: Anchor (`getanchor.co`). Operated by Riby Inc (US) + JompStart Digital (Nigeria) with DobbleHelix Limited as the originating parent. Focus sectors: fashion & textiles, agriculture, staple foods, general goods.
 
 Full source: `Helix_Platform_PRD.md` (PRD v1.0 MVP).
 
@@ -63,6 +63,8 @@ Full source: `Helix_Platform_PRD.md` (PRD v1.0 MVP).
 - **2026-02-22**: Full MVP shipped — 5 modules end-to-end, Anchor MOCKED, 25/25 backend tests passing.
 - **2026-02-23**: JompStart added as 4th operating partner + business credit module (apply → admin decision → accept → disburse). Emergent badge removed, favicon swapped, partner footers updated everywhere.
 - **2026-02-23 (pm)**: (a) JompStart **repayment scheduling + auto-debit** — monthly amortized schedule at accept, auto-deducts from incoming USD (trade payments AND consumer sales) toward next-due installment. (b) Separate **`jompstart_admin` role** — scoped to `/admin/credit` only, 403 on disputes/verifications/finance. (c) **Consumer e-commerce module** — public `/shop` storefront, two listing modes: `buyer_local` (US-stocked, 48-hour) and `riby_dtc` (direct from Africa with Riby Inc as Delivery Partner of Record). Full checkout (2% platform fee), fulfillment queue, consumer role. 10/10 follow-up tests passing, critical bug (duplicate kwarg on listing create) found and fixed; atomic stock decrement; simulate-payment resilient.
+- **2026-02-24**: Rebranded Helix → **Jomp Trade**. Added **Riby Inc escrow** for all consumer orders (funds held at checkout, released on delivery confirm/seller mark-delivered). Added **Quote-then-Prepay** flow (`/api/shop/quotes` request → seller responds → consumer accepts → escrow checkout). JompStart auto-debit now runs at escrow RELEASE rather than payment (reflects real cash flow).
+- **2026-02-24 (pm)**: Iteration 6 stabilization — fixed double-counted 2% marketplace fee bug in `_release_escrow` (credit_tx now gross, fee_tx is the sole 2% debit → seller wallet net = total*0.98 exactly). Quote decline now status-guarded (only pending/quoted). Quote-prepay checkout rejects quantity mismatch (400). `create_quote` restricted to `consumer`/`admin` roles and blocks self-quotes. `accept_offer` collapsed to single update_one and response renamed `transaction_id`→`disbursement_tx_id`. Per-product unique Unsplash images + fallback on `<img onError>`. **Light / Dark theme toggle** wired via `ThemeProvider` + `ThemeToggle` (Sun/Moon button) in Shell, ShopShell, Landing; light theme uses Jomp Icon palette (purple #4A2E8A + orange #F39C12 + white). 29/29 pytest pass across iter5+iter6.
 
 ## 7. Backlog / Next up
 
