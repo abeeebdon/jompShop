@@ -89,12 +89,14 @@ async def create_listing(payload: ShopListingCreate, user: User = Depends(get_cu
     if user.role not in ("exporter", "buyer", "admin", "super_admin"):
         raise HTTPException(403, "Only exporters and buyers can list")
 
+    data = payload.model_dump()
+    data.pop("ships_from", None)
     listing = ShopListing(
         owner_business_id=user.business_id,
         country_of_origin="Nigeria" if user.role == "exporter" else (biz.get("country") or "United States"),
         ships_from=payload.ships_from or (biz.get("address") or ""),
         delivery_partner_of_record=RIBY_PARTNER if payload.fulfillment_mode == "riby_dtc" else "",
-        **payload.model_dump(),
+        **data,
     )
     doc = listing.model_dump()
     doc["created_at"] = doc["created_at"].isoformat()
@@ -142,6 +144,20 @@ async def place_order(payload: ConsumerOrderCreate, user: User = Depends(get_cur
     if listing["status"] != "active" or listing["stock_qty"] < payload.quantity:
         raise HTTPException(400, "Not enough stock")
 
+    # Atomic stock decrement — prevents oversell on concurrent checkouts
+    decremented = await db.shop_listings.find_one_and_update(
+        {"id": payload.listing_id, "status": "active", "stock_qty": {"$gte": payload.quantity}},
+        {"$inc": {"stock_qty": -payload.quantity}},
+        return_document=True,
+        projection={"_id": 0},
+    )
+    if not decremented:
+        raise HTTPException(400, "Not enough stock")
+    # keep `listing` snapshot but use decremented for post-state
+    new_stock = decremented["stock_qty"]
+    if new_stock <= 0:
+        await db.shop_listings.update_one({"id": payload.listing_id}, {"$set": {"status": "out_of_stock"}})
+
     total = round(listing["retail_price_usd"] * payload.quantity, 2)
     order_id = str(uuid.uuid4())
     payment_ref = f"shop_pay_{uuid.uuid4().hex[:14]}"
@@ -170,12 +186,7 @@ async def place_order(payload: ConsumerOrderCreate, user: User = Depends(get_cur
     await db.consumer_orders.insert_one(order)
     order.pop("_id", None)
 
-    # decrement stock
-    new_stock = listing["stock_qty"] - payload.quantity
-    listing_update = {"stock_qty": new_stock}
-    if new_stock <= 0:
-        listing_update["status"] = "out_of_stock"
-    await db.shop_listings.update_one({"id": listing["id"]}, {"$set": listing_update})
+    # (stock already decremented atomically above)
 
     # credit seller USD (net of 2% Helix platform fee on retail)
     fee = round(total * 0.02, 2)

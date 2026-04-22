@@ -1,0 +1,48 @@
+{
+  "summary": "TARGETED re-test of iteration 3 fixes on Helix backend. All 10 pytest cases in test_iteration4_retest.py PASSED on the live preview URL. The iter3 CRITICAL bug (POST /api/shop/listings 500 due to duplicate ships_from kwarg) is RESOLVED. Atomic stock decrement (find_one_and_update with $gte) correctly prevents oversell under concurrency — two parallel checkouts on stock_qty=1 yielded exactly one 200 + one 400, and listing flipped to status=out_of_stock. simulate-payment is now resilient — returned 200 with status=confirmed and jompstart_auto_debit=null when exporter had no outstanding loan. Role guardrails confirmed: exporter-riby_dtc=200, exporter-buyer_local=400, buyer-buyer_local=200, buyer-riby_dtc=400. Listings PATCH title + DELETE round-trip work. Regression consumer checkout on a seeded buyer_local listing works. Anchor remains MOCKED (sandbox_mock) per design.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {
+        "endpoint": "POST /api/shop/listings",
+        "issue": "Category is a strict Literal of ['fashion','agriculture','staple-foods','general-goods'] — any other value 422s. Not a bug, just worth documenting in the OpenAPI description / FE dropdown."
+      },
+      {
+        "endpoint": "POST /api/shop/orders",
+        "issue": "On the 400 branch of the atomic decrement, the error body is the generic {'detail':'Not enough stock'} — indistinguishable from the pre-check 400. Acceptable, but could emit a distinct code (e.g. 'race_lost') so FE could auto-retry if desired."
+      },
+      {
+        "endpoint": "POST /api/orders/{oid}/simulate-payment",
+        "issue": "auto-debit is now try/except-wrapped and logs via log.exception; exception is swallowed silently. Fine for MVP but consider surfacing a non-fatal warning in the response (e.g. 'auto_debit_warning': 'failed — logged') for observability."
+      }
+    ]
+  },
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/test_iteration4_retest.py",
+    "/app/test_reports/pytest/pytest_iter4.xml"
+  ],
+  "action_items": [
+    "No blockers remaining for iteration 3 fixes.",
+    "(Optional polish) Consider returning distinct error code for atomic-decrement 400 (race lost) vs pre-check 400.",
+    "(Optional polish) Expose a non-fatal warning field when auto_debit_on_credit swallows an exception so the issue is visible in API responses, not only in server logs.",
+    "(Carry-over from iter3, still open) Rename `transaction_id` → `disbursement_tx_id` in /api/credit/admin/applications/{aid}/accept response; collapse the two sequential update_one in accept_offer; validate current status before admin decision transitions."
+  ],
+  "critical_code_review_comments": [
+    "shop.py create_listing: fix is clean — data = payload.model_dump(); data.pop('ships_from', None); then ships_from=payload.ships_from or biz.get('address',''). No other duplicate-kwarg risks remain (verified by reading the constructor).",
+    "shop.py place_order: atomic decrement uses find_one_and_update with filter {status:'active', stock_qty:{$gte:qty}} and $inc:-qty. Race verified end-to-end under threading. One redundant pre-check remains on line 144 (`if listing['stock_qty'] < payload.quantity: raise 400`) — harmless but now dead-code-ish since atomic guard handles it; keep as fail-fast.",
+    "orders.simulate_payment: auto-debit wrapped in try/except Exception; log.exception fires. Credit + fee tx are now committed before auto-debit runs → good ordering. debit_tx defaults to None, so response always serialises.",
+    "Mongo: `find_one_and_update(..., return_document=True)` — note that in motor/pymongo this is the deprecated boolean form (True == AFTER). Works today, but `ReturnDocument.AFTER` import is preferred for future-proofing.",
+    "No ObjectId leaks observed on any endpoint touched in this retest (all projections use {_id:0})."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iteration4_retest.py (new — 10 targeted pytest cases across 5 classes)"
+  ],
+  "success_rate": {"backend": "100% (10/10 pass)", "frontend": "not tested (backend-only per request)"},
+  "test_credentials": "Used /app/memory/test_credentials.md verbatim: exporter@helix.com, buyer@helix.com, shopper@helix.com — all password Helix@123.",
+  "seed_data_creation": "No permanent seed data. Tests create TEST_ prefixed listings and clean them up via DELETE at end of TestListingsMineAndMutations + TestAtomicStock. One RFQ→proforma→simulate-payment chain was executed on an exporter product (left in DB as a paid/in_production order — does not affect future runs because each run uses a fresh uuid and Mongo ids). A small number of consumer orders were placed on the seeded buyer_local listing as part of regression (stock decremented by 1 per run). If full clean-up is desired drop: shop_listings (where title starts with TEST_), consumer_orders created today, and the test trade order with message starting 'TEST retest iter4'.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Iteration 3 fixes are VERIFIED on live preview URL. POST /api/shop/listings works for both roles with correct guardrails and DPoR assignment. Atomic stock decrement proven under 2-thread concurrency. simulate-payment auto-debit is exception-safe. No retest needed unless new shop/orders/repayment changes land. Next agent can use test_iteration4_retest.py as a regression smoke. Pending open items from iter2/iter3 (admin decision state check, transaction_id rename) are unrelated to this fix set.",
+  "rca of the issue": "Not applicable — all targeted fixes verified working. The iter3 RCA (duplicate ships_from kwarg into ShopListing()) is resolved by `data = payload.model_dump(); data.pop('ships_from', None); ShopListing(..., ships_from=payload.ships_from or biz.get('address') or '', **data)` at /app/backend/routes/shop.py:92-100."
+}

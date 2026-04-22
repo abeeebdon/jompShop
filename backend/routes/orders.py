@@ -273,7 +273,13 @@ async def simulate_payment(oid: str, user: User = Depends(get_current_user)):
                 cta_label="View Order", cta_url=f"/orders/{oid}",
             ),
         )
-    return {"status": "confirmed", "amount": o["agreed_price_usd"], "fee": fee_amount, "jompstart_auto_debit": await auto_debit_on_credit(o["supplier_id"], source_description=f"Order {o['order_number']}")}
+    # JompStart auto-debit against outstanding credit (if any) — best effort
+    debit_tx = None
+    try:
+        debit_tx = await auto_debit_on_credit(o["supplier_id"], source_description=f"Order {o['order_number']}")
+    except Exception as e:
+        log.exception("auto-debit failed: %s", e)
+    return {"status": "confirmed", "amount": o["agreed_price_usd"], "fee": fee_amount, "jompstart_auto_debit": debit_tx}
 
 
 # ---------- Disputes ----------
