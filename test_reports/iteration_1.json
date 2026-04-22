@@ -1,0 +1,43 @@
+{
+  "summary": "First-iteration backend regression for Helix Platform. 25/25 pytest tests pass against live preview URL. Covered: service metadata, JWT register/login/me, role-based access (401/403), FX, full Catalog CRUD with auto-NGN price, Businesses + KYB submission + admin approval (provisions Anchor accounts), full Order lifecycle (RFQ -> proforma idempotent 400 on re-submit -> simulate-payment -> status advancement) + all 4 PDFs (proforma/commercial/packing/origin) returning real PDF bytes, Compliance docs/score/requirements, Finance dashboard/transactions/withdraw (insufficient-balance guard) + admin overview, Anchor webhook accepting mocked event with skipped sig verification.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "POST /api/businesses", "issue": "create_business_customer / create_individual_customer / submit_kyb / create_deposit_account in onboarding.py are called synchronously in async handlers. They are mock no-op stubs today so it works, but if Anchor mock is swapped for real HTTP later, this will block the event loop. Recommend awaiting via asyncio.to_thread or making the client async."},
+      {"endpoint": "POST /api/finance/withdraw", "issue": "initiate_nip_transfer is sync inside async handler — same as above."},
+      {"endpoint": "GET /api/businesses/me", "issue": "response_model=Business | None — pydantic union with None response is fine but for buyers with no business it returns 200 + null; consider 204 for clarity."},
+      {"endpoint": "POST /api/auth/emergent/session", "issue": "Uses synchronous `requests.get` inside an async route — should be httpx.AsyncClient to avoid blocking the event loop."}
+    ]
+  },
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "Optional: replace blocking `requests.get` in /api/auth/emergent/session with an async HTTP client.",
+    "Optional: wrap synchronous Anchor-client calls (create_*_customer, submit_kyb, create_deposit_account, initiate_nip_transfer) with asyncio.to_thread or convert to async — important before flipping ANCHOR_ENV to a real env.",
+    "Cosmetic: when seed already approved both businesses, /api/admin/verifications can return [] — that is acceptable per spec; a manual KYB flow exercised in test_business_creation_kyb_and_admin_decide proves the queue + decide path.",
+    "Idempotency on POST /api/orders/{oid}/simulate-payment is correct (returns {status: already_confirmed} on retry) and POST /api/orders/{oid}/proforma correctly returns 400 if already confirmed."
+  ],
+  "critical_code_review_comments": [
+    "auth.py: clean bcrypt + JWT + session-token resolution (cookie OR bearer). Good pattern.",
+    "All Mongo queries explicitly project {_id: 0} — no ObjectId leakage observed in any tested response.",
+    "PDFs use ReportLab and return Response(media_type='application/pdf') with %PDF magic bytes verified.",
+    "FX endpoint returns live usd_to_ngn (saw 1485 at test time) with a sane fallback (1650).",
+    "Role enforcement: require_roles dependency works (buyer hitting /api/admin/verifications returns 403; unauthenticated returns 401).",
+    "Webhook in mock mode bypasses signature verification — confirmed; logged as informational.",
+    "Anchor sandbox_mock returns deterministic ids (anchor_cust_*, anchor_acct_*, nip_*) — endpoints accept and persist them.",
+    "Minor: server.py uses deprecated @app.on_event('startup'/'shutdown') — FastAPI lifespan handler is preferred but functional."
+  ],
+  "updated_files": [
+    "/app/backend/tests/backend_test.py (created — 25 pytest cases, 7 classes)",
+    "/app/backend/tests/__init__.py (created empty)"
+  ],
+  "success_rate": {"backend": "100% (25/25)", "frontend": "not tested (per request)"},
+  "test_credentials": "Used /app/memory/test_credentials.md: admin@helix.com / exporter@helix.com / buyer@helix.com all with Helix@123. Seed data verified: 6 products, 2 orders, 4 compliance docs, 2 approved businesses, exporter pre-credited ~15600 USD (-156 fee = 15444 net) and ~8.4M NGN.",
+  "seed_data_creation": "No new seed needed; tests create TEST_-prefixed transient data (products, businesses, compliance docs, orders) and clean up products. Test data left in DB: a few transient TEST_ businesses/orders that don't affect future runs.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Backend is solid. For next iteration (frontend), expect REACT_APP_BACKEND_URL=https://trade-nexus-110.preview.emergentagent.com. Login flows: JWT email/password works; Emergent OAuth uses /api/auth/emergent/session with session_id then sets httpOnly cookie. The simulate-payment endpoint is the manual trigger replacing a real Anchor account.credited webhook — frontend should expose a 'Mark Payment Received' button on confirmed orders that calls POST /api/orders/{oid}/simulate-payment. Transactions accumulate per-test-run; if you need clean balances drop the `transactions` collection or re-seed."
+}
