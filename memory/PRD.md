@@ -60,7 +60,9 @@ Full source: `Helix_Platform_PRD.md` (PRD v1.0 MVP).
 - All demo passwords: `Helix@123`.
 
 ## 6. What's been implemented (log)
-- **2026-02-22**: Full MVP shipped — 5 modules end-to-end, Anchor MOCKED, 25/25 backend tests passing, beautiful Command Center UI live.
+- **2026-02-22**: Full MVP shipped — 5 modules end-to-end, Anchor MOCKED, 25/25 backend tests passing.
+- **2026-02-23**: JompStart added as 4th operating partner + business credit module (apply → admin decision → accept → disburse). Emergent badge removed, favicon swapped, partner footers updated everywhere.
+- **2026-02-23 (pm)**: (a) JompStart **repayment scheduling + auto-debit** — monthly amortized schedule at accept, auto-deducts from incoming USD (trade payments AND consumer sales) toward next-due installment. (b) Separate **`jompstart_admin` role** — scoped to `/admin/credit` only, 403 on disputes/verifications/finance. (c) **Consumer e-commerce module** — public `/shop` storefront, two listing modes: `buyer_local` (US-stocked, 48-hour) and `riby_dtc` (direct from Africa with Riby Inc as Delivery Partner of Record). Full checkout (2% platform fee), fulfillment queue, consumer role. 10/10 follow-up tests passing, critical bug (duplicate kwarg on listing create) found and fixed; atomic stock decrement; simulate-payment resilient.
 
 ## 7. Backlog / Next up
 
