@@ -29,7 +29,7 @@ def _header_table(doc_title: str, doc_number: str, issue_date: str) -> Table:
     data = [
         [Paragraph("<b>HELIX PLATFORM</b>", ParagraphStyle("h", fontName="Helvetica-Bold", fontSize=14, textColor=GOLD)),
          Paragraph(f"<font color='#0A1628'><b>{doc_title.upper()}</b></font>", ParagraphStyle("t", fontName="Helvetica-Bold", fontSize=14, alignment=TA_RIGHT))],
-        [Paragraph("DobbleHelix Limited · Riby Inc · Powered by GetAnchor", ParagraphStyle("s", fontName="Helvetica", fontSize=8, textColor=TEAL)),
+        [Paragraph("DobbleHelix Limited · Riby Inc · JompStart Digital · Powered by Anchor", ParagraphStyle("s", fontName="Helvetica", fontSize=8, textColor=TEAL)),
          Paragraph(f"<font color='#1A1A2E'>No. <b>{doc_number}</b><br/>Issued: {issue_date}</font>",
                    ParagraphStyle("d", fontName="Helvetica", fontSize=9, alignment=TA_RIGHT))],
     ]

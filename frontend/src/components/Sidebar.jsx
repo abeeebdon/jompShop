@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import {
   HouseSimple, Package, Receipt, ShieldCheck, Wallet, Users,
-  SignOut, ArrowsClockwise, CaretRight, Storefront, FileText, CurrencyCircleDollar, Gauge,
+  SignOut, ArrowsClockwise, CaretRight, Storefront, FileText, CurrencyCircleDollar, Gauge, HandCoins,
 } from "@phosphor-icons/react";
 import { useAuth } from "../lib/auth-context";
 
@@ -13,6 +13,7 @@ const NAV = {
     { to: "/orders", label: "Orders", icon: Receipt },
     { to: "/compliance", label: "Compliance", icon: ShieldCheck },
     { to: "/finance", label: "Finance", icon: Wallet },
+    { to: "/credit", label: "Business Credit", icon: HandCoins },
     { to: "/onboarding", label: "Business Profile", icon: FileText },
   ],
   buyer: [
@@ -25,6 +26,7 @@ const NAV = {
   admin: [
     { to: "/admin", label: "Admin Overview", icon: Gauge },
     { to: "/admin/verifications", label: "Verifications", icon: ShieldCheck },
+    { to: "/admin/credit", label: "JompStart Credit", icon: HandCoins },
     { to: "/admin/disputes", label: "Disputes", icon: ArrowsClockwise },
     { to: "/admin/finance", label: "Financial Overview", icon: CurrencyCircleDollar },
     { to: "/catalog", label: "Marketplace", icon: Storefront },

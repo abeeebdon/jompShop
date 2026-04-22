@@ -17,6 +17,15 @@ export default function Shell({ children, title, kicker, actions }) {
         <main className="max-w-[1400px] mx-auto px-6 lg:px-10 py-8 fade-up">
           {children}
         </main>
+        <footer className="border-t border-[#1A7A6E]/15 py-6 px-6 lg:px-10 max-w-[1400px] mx-auto">
+          <div className="text-[10px] font-mono tracking-[0.2em] text-[#1A7A6E] flex flex-wrap gap-x-3 gap-y-1 justify-center uppercase">
+            <span>Helix · Powered by</span>
+            <span className="text-[#9CA3AF]">DobbleHelix Limited</span><span>·</span>
+            <span className="text-[#9CA3AF]">Riby Inc</span><span>·</span>
+            <span className="text-[#9CA3AF]">JompStart Digital Limited</span><span>·</span>
+            <span className="text-[#9CA3AF]">Anchor</span>
+          </div>
+        </footer>
       </div>
     </div>
   );

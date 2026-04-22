@@ -59,7 +59,10 @@ def wrap_email(title: str, body_html: str, cta_label: Optional[str] = None, cta_
             <h1 style="color:#0A1628;font-size:22px;margin:0 0 16px 0;">{title}</h1>
             <div style="color:#1A1A2E;font-size:15px;line-height:1.6;">{body_html}</div>
             {cta}
-            <p style="margin-top:32px;color:#6b7280;font-size:12px;">Helix Platform · DobbleHelix Limited · Riby Inc · Powered by GetAnchor</p>
+            <p style="margin-top:32px;color:#6b7280;font-size:11px;line-height:1.5;">
+              Helix Platform · Connecting Africa to the World, One Trade at a Time<br/>
+              Powered by <b>DobbleHelix Limited</b> (Nigeria &amp; Africa Operations) · <b>Riby Inc</b> (United States &amp; Global Operations) · <b>JompStart Digital Limited</b> (Business Credit) · <b>Anchor</b> (Global Banking &amp; Payment Service)
+            </p>
           </td></tr>
         </table>
       </td></tr>

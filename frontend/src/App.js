@@ -19,6 +19,9 @@ import Finance from "./pages/Finance";
 import AdminOverview from "./pages/AdminOverview";
 import AdminVerifications from "./pages/AdminVerifications";
 import AdminDisputes from "./pages/AdminDisputes";
+import Credit from "./pages/Credit";
+import CreditDetail from "./pages/CreditDetail";
+import AdminCredit from "./pages/AdminCredit";
 
 function AppRouter() {
   const loc = useLocation();
@@ -38,9 +41,12 @@ function AppRouter() {
       <Route path="/orders/:id" element={<Protected><OrderDetail /></Protected>} />
       <Route path="/compliance" element={<Protected><Compliance /></Protected>} />
       <Route path="/finance" element={<Protected><Finance /></Protected>} />
+      <Route path="/credit" element={<Protected roles={["exporter"]}><Credit /></Protected>} />
+      <Route path="/credit/:id" element={<Protected><CreditDetail /></Protected>} />
       <Route path="/admin" element={<Protected roles={["admin", "super_admin"]}><AdminOverview /></Protected>} />
       <Route path="/admin/verifications" element={<Protected roles={["admin", "super_admin"]}><AdminVerifications /></Protected>} />
       <Route path="/admin/disputes" element={<Protected roles={["admin", "super_admin"]}><AdminDisputes /></Protected>} />
+      <Route path="/admin/credit" element={<Protected roles={["admin", "super_admin"]}><AdminCredit /></Protected>} />
       <Route path="/admin/finance" element={<Protected roles={["admin", "super_admin"]}><AdminOverview /></Protected>} />
     </Routes>
   );

@@ -1,0 +1,43 @@
+{
+  "summary": "Iteration 2 — JompStart Business Credit module backend tests. 18/18 pytest tests pass against the live preview URL. Covered: regression smoke (root/login/finance/orders/compliance-score=75), eligibility engine for exporter (eligible, max_limit=$7,676, APR 14.7%, partner='JompStart Digital Limited', paid_order_count=1) and buyer (ineligible with reasons), full happy path (submit JMP-prefixed app → over-limit 400 guard → /mine listing → own GET → cross-user 403 → admin queue 403 for buyer / 200 for admin with business_name+business_country decoration → admin offered decision → exporter accept creating USD credit tx with anchor_event_type='jompstart.credit.disbursed' → tx visible in /finance/transactions), and a separate fresh-application rejection path. Anchor remains MOCKED.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "POST /api/credit/applications/{aid}/accept", "issue": "Response returns `transaction_id` while the problem-statement acceptance criteria and the doc field both use `disbursement_tx_id`. Non-blocking (app doc correctly has `disbursement_tx_id`) but the API response key is inconsistent — recommend renaming the response key to `disbursement_tx_id` for consistency."},
+      {"endpoint": "POST /api/credit/applications/{aid}/accept", "issue": "Two sequential `db.credit_applications.update_one` calls — first sets status='accepted' then immediately overwrites to 'disbursed'. If the second call fails, the app is left in 'accepted' state with no disbursement. Consider a single atomic update, or wrap in a try/except that rolls back the intermediate status."},
+      {"endpoint": "POST /api/credit/applications/{aid}/accept", "issue": "Timeline array is rebuilt in Python from the pre-read `doc['timeline']` and written back twice — race condition if two accepts race. Minor since status gate prevents re-accept, but $push would be safer."},
+      {"endpoint": "POST /api/credit/applications", "issue": "`amount_usd` is coerced with `float(...)` but no upper bound on term_months/purpose length; also `indicative_apr` snapshot can be None for ineligible (handled, but document)."},
+      {"endpoint": "POST /api/credit/admin/applications/{aid}/decision", "issue": "Endpoint lets admin move an already-decided application (e.g. disbursed → rejected). Recommend validating current status (only `submitted`/`under_review` → offered|rejected; only `offered` accept path)."},
+      {"endpoint": "GET /api/credit/admin/applications", "issue": "N+1 on businesses lookup (one find_one per application). Fine for MVP but should use a single `$in` or aggregate `$lookup` once volume grows."}
+    ]
+  },
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/test_credit.py",
+    "/app/test_reports/pytest/pytest_iter2_credit.xml"
+  ],
+  "action_items": [
+    "Optional consistency fix: rename `transaction_id` → `disbursement_tx_id` in accept endpoint response.",
+    "Optional robustness: collapse the two update_one calls in accept_offer into a single atomic update or add rollback on disbursement failure.",
+    "Optional: guard admin decision endpoint against transitions from terminal states (disbursed/rejected/closed)."
+  ],
+  "critical_code_review_comments": [
+    "credit.py: clean separation of eligibility engine vs routes. Formula (40% of trailing volume, capped $100k, × 0.7–1.3 compliance multiplier, + order-count bonus) is sensible and matches the demo ($15,600 × 0.4 × ~1.15 + $500 ≈ $7,676 observed).",
+    "All Mongo queries project `{_id: 0}` — no ObjectId leakage observed in any credit endpoint response.",
+    "Role enforcement via require_roles on admin endpoints is correct (buyer → 403, admin → 200).",
+    "Ownership check on GET/accept correctly compares business_id and returns 403 for cross-tenant access.",
+    "Disbursement transaction is written with `anchor_event_type='jompstart.credit.disbursed'` and distinct `counterparty='JompStart Digital'` — makes it trivial to filter in the ledger UI.",
+    "Compliance score now 75 (NAFDAC active + Fumigation + FSSAI in seed) — iteration 1 was ~40, iteration 2 unlocks credit eligibility as intended.",
+    "Minor: accept endpoint does two updates instead of one atomic update (see minor issues).",
+    "Minor: admin decision endpoint does not validate current status before transitioning (see minor issues)."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_credit.py (created — 18 pytest cases, 4 classes)"
+  ],
+  "success_rate": {"backend": "100% (18/18)", "frontend": "not tested (per request)"},
+  "test_credentials": "Used /app/memory/test_credentials.md: admin@helix.com / exporter@helix.com / buyer@helix.com all with Helix@123.",
+  "seed_data_creation": "No new seed data created. Tests create TEST_-prefixed credit applications (rejection-path + happy-path apps left in DB — they don't interfere with future runs because each run uses a fresh uuid and the exporter's max_limit is far below their cumulative commitment in these tests, but if the credit engine later subtracts outstanding principal from the available limit, the seed may need a reset between iterations).",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "The JompStart credit happy path + rejection path + regression smoke all pass on live preview URL. The accept endpoint returns `transaction_id` while the application doc stores `disbursement_tx_id` — tests accept either for forward-compat. If frontend testing is requested next, relevant pages are /app/frontend/src/pages/Credit.jsx, CreditDetail.jsx, AdminCredit.jsx; key flows: exporter navigates to 'Business Credit' sidebar link → sees eligibility card (limit/APR/partner) → submits application → admin logs in → opens 'JompStart Credit' admin link → offers → exporter returns to detail page → accepts → disbursement tx lands in Finance ledger. Each test run accumulates applications; drop `db.credit_applications` between iterations for clean state."
+}

@@ -147,20 +147,31 @@ export default function Landing() {
 
       {/* PARTNERS */}
       <section id="partners" className="py-20 border-t border-[#1A7A6E]/15">
-        <div className="max-w-[1400px] mx-auto px-6 lg:px-10 text-center">
-          <div className="helix-kicker mb-3">Operated by</div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8 max-w-4xl mx-auto">
-            <div className="helix-card p-8">
-              <div className="text-[#C9922A] font-bold tracking-[0.25em] text-sm">DOBBLEHELIX</div>
-              <div className="text-[12px] text-[#9CA3AF] mt-2 font-mono">NIGERIA OPERATIONS</div>
+        <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
+          <div className="text-center">
+            <div className="helix-kicker mb-3">Powered By</div>
+            <h2 className="helix-h2 max-w-2xl mx-auto">Four operating partners. One unified platform.</h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-10">
+            <div className="helix-card p-6">
+              <div className="text-[#C9922A] font-bold tracking-[0.22em] text-sm">DOBBLEHELIX</div>
+              <div className="text-[10px] tracking-[0.3em] text-[#1A7A6E] font-mono mt-1">LIMITED</div>
+              <p className="text-[12px] text-[#9CA3AF] mt-4 leading-relaxed">Nigeria &amp; Africa operations, exporter onboarding and ground operations.</p>
             </div>
-            <div className="helix-card p-8">
-              <div className="text-[#C9922A] font-bold tracking-[0.25em] text-sm">RIBY INC</div>
-              <div className="text-[12px] text-[#9CA3AF] mt-2 font-mono">US OPERATIONS</div>
+            <div className="helix-card p-6">
+              <div className="text-[#C9922A] font-bold tracking-[0.22em] text-sm">RIBY INC</div>
+              <div className="text-[10px] tracking-[0.3em] text-[#1A7A6E] font-mono mt-1">UNITED STATES</div>
+              <p className="text-[12px] text-[#9CA3AF] mt-4 leading-relaxed">United States &amp; global operations, buyer coordination and US compliance.</p>
             </div>
-            <div className="helix-card p-8">
-              <div className="text-[#C9922A] font-bold tracking-[0.25em] text-sm">GETANCHOR</div>
-              <div className="text-[12px] text-[#9CA3AF] mt-2 font-mono">BANKING PARTNER</div>
+            <div className="helix-card p-6">
+              <div className="text-[#C9922A] font-bold tracking-[0.22em] text-sm">JOMPSTART</div>
+              <div className="text-[10px] tracking-[0.3em] text-[#1A7A6E] font-mono mt-1">DIGITAL LIMITED</div>
+              <p className="text-[12px] text-[#9CA3AF] mt-4 leading-relaxed">Builds &amp; maintains the platform, and extends business credit to exporters against their sales records.</p>
+            </div>
+            <div className="helix-card p-6">
+              <div className="text-[#C9922A] font-bold tracking-[0.22em] text-sm">ANCHOR</div>
+              <div className="text-[10px] tracking-[0.3em] text-[#1A7A6E] font-mono mt-1">BANKING PARTNER</div>
+              <p className="text-[12px] text-[#9CA3AF] mt-4 leading-relaxed">Global banking &amp; payment service — NGN, USD accounts, transfers and reconciliation.</p>
             </div>
           </div>
         </div>
@@ -180,8 +191,16 @@ export default function Landing() {
         </div>
       </section>
 
-      <footer className="border-t border-[#1A7A6E]/15 py-10 text-center text-[12px] text-[#9CA3AF]">
-        Helix Platform · DobbleHelix Limited · Riby Inc · Powered by GetAnchor
+      <footer className="border-t border-[#1A7A6E]/15 py-10">
+        <div className="max-w-[1400px] mx-auto px-6 lg:px-10 text-center">
+          <div className="text-[12px] text-[#9CA3AF]">Helix Platform — Connecting Africa to the World, One Trade at a Time</div>
+          <div className="text-[11px] text-[#1A7A6E] font-mono tracking-widest mt-3 flex flex-wrap justify-center gap-x-3 gap-y-1">
+            <span>DOBBLEHELIX LIMITED</span><span>·</span>
+            <span>RIBY INC</span><span>·</span>
+            <span>JOMPSTART DIGITAL LIMITED</span><span>·</span>
+            <span>ANCHOR</span>
+          </div>
+        </div>
       </footer>
     </div>
   );
