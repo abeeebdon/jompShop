@@ -36,8 +36,9 @@ function AppRouter() {
   if (loc.hash?.includes("session_id=")) return <AuthCallback />;
   return (
     <Routes>
-      <Route path="/" element={<Landing />} />
+      <Route path="/" element={<Shop />} />
       <Route path="/shop" element={<Shop />} />
+      <Route path="/about" element={<Landing />} />
       <Route path="/shop/product/:id" element={<ShopProduct />} />
       <Route path="/shop/orders" element={<Protected><ConsumerOrders /></Protected>} />
       <Route path="/login" element={<Login />} />

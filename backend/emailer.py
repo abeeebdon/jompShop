@@ -60,7 +60,7 @@ def wrap_email(title: str, body_html: str, cta_label: Optional[str] = None, cta_
             <div style="color:#1A1A2E;font-size:15px;line-height:1.6;">{body_html}</div>
             {cta}
             <p style="margin-top:32px;color:#6b7280;font-size:11px;line-height:1.5;">
-              Jomp Trade · Connecting Africa to the World, One Trade at a Time<br/>
+              Jomp Shop · Connecting Africa to the World, One Trade at a Time<br/>
               Powered by <b>Riby Inc</b> (US &amp; Global Operations · Delivery Partner of Record) · <b>JompStart Digital Limited</b> (Nigeria &amp; Africa · Platform · Business Credit) · <b>Anchor</b> (Global Business Banking &amp; Payment Services)
             </p>
           </td></tr>

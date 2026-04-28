@@ -26,7 +26,7 @@ export default function Login() {
       toast.success(`Welcome back, ${user.name.split(" ")[0]}`);
       let to = loc.state?.from;
       if (!to) {
-        if (user.role === "consumer") to = "/shop";
+        if (user.role === "consumer") to = "/";
         else if (user.role === "jompstart_admin") to = "/admin/credit";
         else if (["admin", "super_admin"].includes(user.role)) to = "/admin";
         else to = "/dashboard";
@@ -42,7 +42,7 @@ export default function Login() {
   return (
     <AuthShell>
       <div className="w-full max-w-md helix-card p-8 fade-up">
-        <div className="helix-kicker mb-2">Jomp Trade · Sign in</div>
+        <div className="helix-kicker mb-2">Jomp Shop · Sign in</div>
         <h1 className="helix-h2">Access your command center</h1>
         <p className="text-[#9CA3AF] text-sm mt-2">Exporter, buyer, consumer, or admin &mdash; one login.</p>
 
@@ -80,7 +80,7 @@ export default function Login() {
           <div className="text-[#C9922A]">DEMO ACCOUNTS</div>
           <div>exporter@helix.com · Helix@123</div>
           <div>buyer@helix.com · Helix@123</div>
-          <div>admin@helix.com · Helix@123 <span className="text-[#1A7A6E]">(Jomp Trade ops)</span></div>
+          <div>admin@helix.com · Helix@123 <span className="text-[#1A7A6E]">(Jomp Shop ops)</span></div>
           <div>credit@jompstart.com · Helix@123 <span className="text-[#1A7A6E]">(JompStart Credit)</span></div>
           <div>shopper@helix.com · Helix@123 <span className="text-[#1A7A6E]">(consumer)</span></div>
         </div>
@@ -98,7 +98,7 @@ export function AuthShell({ children }) {
           <Link to="/" className="flex items-center gap-3" data-testid="brand-auth">
             <img src="/jomp-icon.png" alt="Jomp" className="w-9 h-9 rounded-full"/>
             <div>
-              <div className="font-bold tracking-[0.22em] text-sm">JOMP TRADE</div>
+              <div className="font-bold tracking-[0.22em] text-sm">JOMP SHOP</div>
               <div className="text-[10px] tracking-[0.3em] text-[#1A7A6E] font-mono">EXPORT OS</div>
             </div>
           </Link>
@@ -107,7 +107,7 @@ export function AuthShell({ children }) {
             <h2 className="helix-h2 max-w-md">One login. Four roles. Every trade in one command center.</h2>
             <p className="text-[#9CA3AF] mt-4 text-sm max-w-md">Riby Inc · JompStart Digital Limited · Anchor.</p>
           </div>
-          <div className="font-mono text-[11px] text-[#1A7A6E] tracking-widest">© 2026 · JOMP TRADE v1.1</div>
+          <div className="font-mono text-[11px] text-[#1A7A6E] tracking-widest">© 2026 · JOMP SHOP v1.1</div>
         </div>
       </div>
       <div className="flex-1 flex items-center justify-center p-6">

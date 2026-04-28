@@ -54,7 +54,7 @@ export default function Sidebar() {
       <div className="px-4 lg:px-6 py-5 border-b border-[#1A7A6E]/15 flex items-center gap-2">
         <img src="/jomp-icon.png" alt="Jomp" className="w-8 h-8 rounded-full"/>
         <div className="hidden lg:flex flex-col leading-tight">
-          <span className="font-bold tracking-[0.2em] text-[13px]">JOMP TRADE</span>
+          <span className="font-bold tracking-[0.2em] text-[13px]">JOMP SHOP</span>
           <span className="text-[9px] tracking-[0.3em] text-[#1A7A6E] font-mono">EXPORT OS v1.1</span>
         </div>
       </div>

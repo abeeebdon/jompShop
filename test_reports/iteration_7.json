@@ -1,0 +1,39 @@
+{
+  "summary": "Iteration 7 — JompShop restructure (rename + 50-listing catalog + 3-role registration + Shop-as-home). Backend: 23/23 pytest pass (13 new iter7 + 10 iter6 regression). 50 active listings spread across 7 categories (fashion=10, staple-foods=9, agriculture=5, beauty=8, home-decor=8, accessories=6, beverages=4). All 50 listings have non-empty photos[0]. Filters verified: ?category=beauty (8 results, all match), ?category=fashion (≥10), ?fulfillment=riby_dtc (all DTC), ?search=shea (2 shea-butter items). POST /api/auth/register works for all three roles consumer/buyer/exporter and login round-trip returns the correct role. Escrow regression: place→confirm-delivery still credits 98% (gross_amount_usd=total, fee=2%). Credit eligibility/apply/offer/accept→disbursed unchanged. Frontend (logged-out + logged-in): / renders new Shop landing with kicker 'Africa's marketplace · From maker to your door', hero-search-input + hero-search-submit, all 7 category tiles (cat-fashion … cat-beverages), 50+ listing-{id} cards. Clicking cat-fashion navigates to /?category=fashion and shows 18 fashion listings (10 catalog + 8 leftover TEST_iter6). Hero search 'shea' → /?q=shea, filters to 2 shea results. /about renders the old B2B Landing.jsx ('Every trade in one command center'), no auto-redirect when logged-in, brand back to /. /shop is an alias for / (renders Shop with same hero+listings). /register shows 3 role cards (role-card-consumer/buyer/exporter), role-continue-btn disabled until card selected, then advances to form with back-to-roles available. /register?role=exporter skips chooser straight to form. Post-login redirects: shopper→/, exporter→/dashboard (verified). user-menu-trigger on / opens dropdown with name+role badge, My Orders, and red 'Sign out' (shop-logout). All branding shows 'JOMP SHOP'/'Jomp Shop'; no 'Jomp Trade'/'JompTrade' string anywhere in DOM on /, /about, /shop, /register, /login. Theme toggle on / flips dark↔light and persists across reload (localStorage 'jomp-theme'). 60 <img> elements on home, 0 broken (naturalWidth=0).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "/ Shop landing", "issues": ["Leftover TEST_iter6 fashion fixtures (no real photos but rendering via fallback) appear in 'Featured today' grid alongside real catalog. Cosmetic only — these are namespaced TEST_ rows. Iteration 6 already flagged a placeholder-image suggestion when photos=[]; it appears the listing card now renders an image (possibly via fallback or seller-business default) so naturalWidth>0 — no broken DOM but the duplicated amala-stew thumbnails are noise. Cleanup the TEST_iter6_* DTC listings from DB if you want a cleaner storefront."]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration7_shop.py",
+    "/app/backend/tests/test_iteration6_fixes.py",
+    "/app/test_reports/pytest/pytest_iter7.xml"
+  ],
+  "action_items": [
+    "OPTIONAL: Delete leftover TEST_iter6_* listings from shop_listings collection so storefront only shows the canonical 50. Trivial cleanup, not a regression."
+  ],
+  "critical_code_review_comments": [
+    "shop_catalog.LISTINGS_50 successfully populated and exposed via GET /api/shop/listings — 7 categories present, all photos non-empty, fulfillment_mode mix correct.",
+    "Filtering on listing endpoint (category, fulfillment, search) is server-side and case-correct — search('shea') matches title+description.",
+    "POST /api/auth/register accepts and persists role ∈ {consumer, buyer, exporter} (case-insensitive on input email, role echoed back as lowercase). Login returns user.role faithfully.",
+    "Frontend: ShopShell vs Shell split is clean — / and /shop use ShopShell with hero+categories+nav-shop/-direct/-instock/-about/-sell; /dashboard still uses dashboard Shell. user-menu-trigger only present in ShopShell (not on /dashboard) — consistent with the marketplace-first design but worth confirming user can sign out from dashboard via its own header.",
+    "Register.jsx 2-step flow (role chooser → form) and ?role= deep-link both work; role-continue-btn correctly disabled until selection, back-to-roles present in step 2.",
+    "Branding rename complete — no 'Jomp Trade'/'JompTrade'/'JOMP TRADE' in rendered DOM on any tested route.",
+    "Theme toggle persists via localStorage 'jomp-theme' and is re-applied on reload across / + /about + /register.",
+    "console: 401 responses on /api/me when not authenticated are expected behavior (silent prefetch); not a bug."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iteration7_shop.py (new — 13 pytest cases covering 50-catalog, filters, 3-role registration, escrow regression, credit regression)"
+  ],
+  "success_rate": {"backend": "100% (23/23 pytest pass: 13 iter7 + 10 iter6 regression)", "frontend": "100% on all 11 explicit UI assertions (Shop landing, category click, hero search, /about no-redirect, /shop alias, role chooser, ?role deep link, login redirects, user menu, branding, theme persist, broken-img check)"},
+  "test_credentials": "Used /app/memory/test_credentials.md verbatim — admin@helix.com, exporter@helix.com, buyer@helix.com, shopper@helix.com, credit@jompstart.com (all Helix@123).",
+  "seed_data_creation": "Created and then cleaned up: 1 TEST_iter7 listing + 6 TEST_iter7_*/test_iter7_* user accounts. All deleted post-test via Mongo regex on title/email. The pre-existing TEST_iter6_* DTC listings (~13) from previous iteration were NOT deleted — see action_items.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "All 16 items in iter7 review request verified green. Backend suite at /app/backend/tests/test_iteration7_shop.py is the new authoritative regression for the JompShop restructure (50-listing catalog assertions are slightly defensive — uses len(data) >= 50 to tolerate user-created listings being added on top of the canonical catalog). Note: leftover TEST_iter6_* fixtures still visible on storefront — pure cleanup item, no functional impact.",
+  "rca of the issue": "N/A — no functional issues found. The lone visual remark (TEST_iter6 cards on storefront) is leftover seed data, not a code defect."
+}

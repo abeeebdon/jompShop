@@ -442,61 +442,13 @@ async def seed_if_empty():
     ]
     await db.compliance_documents.insert_many(compliance_docs)
 
-    # ---------- Shop listings ----------
-    # Buyer local inventory (Brooklyn warehouse re-sell)
-    buyer_listing = {
-        "id": str(uuid.uuid4()),
-        "owner_business_id": byr_biz["id"],
-        "title": "Ofada Rice 5kg Retail Bag — From Brooklyn Warehouse",
-        "description": "Authentic single-origin Ofada rice imported direct from Ogun State, Nigeria. Repackaged into retail-ready 5kg bags at our Brooklyn facility. Ships within 48 hours across the US.",
-        "photos": [f"{_U}1536304929831-ee1ca9d44906{_IMG}"],
-        "category": "staple-foods",
-        "retail_price_usd": 24.99,
-        "stock_qty": 120,
-        "fulfillment_mode": "buyer_local",
-        "source_order_id": o2_id,  # from the delivered trade order
-        "source_product_id": p2["id"],
-        "country_of_origin": "Nigeria",
-        "ships_from": "Brooklyn, NY",
-        "delivery_partner_of_record": "",
-        "status": "active",
-        "created_at": _now_iso(),
-    }
-    # Exporter DTC (Riby Inc of record)
-    exp_listing = {
-        "id": str(uuid.uuid4()),
-        "owner_business_id": exp_biz["id"],
-        "title": "Unrefined Shea Butter 500g Jar — Direct from Nigeria",
-        "description": "Grade A unrefined shea butter hand-whipped by Northern Nigeria women's cooperatives. 500g glass jars, individually labeled. Ships direct — Riby Inc handles US import and last-mile delivery.",
-        "photos": [f"{_U}1565193566173-7a0ee3dbe261{_IMG}"],
-        "category": "agriculture",
-        "retail_price_usd": 32.00,
-        "stock_qty": 60,
-        "fulfillment_mode": "riby_dtc",
-        "source_product_id": product_docs[4]["id"],
-        "country_of_origin": "Nigeria",
-        "ships_from": "Lagos, Nigeria → Riby US fulfillment",
-        "delivery_partner_of_record": "Riby Inc",
-        "status": "active",
-        "created_at": _now_iso(),
-    }
-    exp_listing_2 = {
-        "id": str(uuid.uuid4()),
-        "owner_business_id": exp_biz["id"],
-        "title": "Handwoven Adire Scarf — Lagos Artisan Edition",
-        "description": "Hand-dyed Adire indigo scarf (180×50cm) from Abeokuta artisans. Individually numbered. Riby Inc imports and fulfills in the US on behalf of the maker.",
-        "photos": [f"{_U}1528459105426-b9548367069b{_IMG}"],
-        "category": "fashion",
-        "retail_price_usd": 89.00,
-        "stock_qty": 45,
-        "fulfillment_mode": "riby_dtc",
-        "source_product_id": product_docs[0]["id"],
-        "country_of_origin": "Nigeria",
-        "ships_from": "Lagos → Riby US fulfillment",
-        "delivery_partner_of_record": "Riby Inc",
-        "status": "active",
-        "created_at": _now_iso(),
-    }
-    await db.shop_listings.insert_many([buyer_listing, exp_listing, exp_listing_2])
+    # ---------- Shop listings (50-product catalog) ----------
+    from shop_catalog import LISTINGS_50, to_listing_doc
+    listing_docs = []
+    iso_now = _now_iso()
+    for idx, item in enumerate(LISTINGS_50):
+        owner_biz = byr_biz["id"] if item[5] == "buyer_local" else exp_biz["id"]
+        listing_docs.append(to_listing_doc(idx, owner_biz, item, iso_now))
+    await db.shop_listings.insert_many(listing_docs)
 
-    log.info("Seed complete: 5 users, 2 businesses, %d products, 2 orders, %d compliance docs, 3 shop listings", len(product_docs), len(compliance_docs))
+    log.info("Seed complete: 5 users, 2 businesses, %d products, 2 orders, %d compliance docs, %d shop listings", len(product_docs), len(compliance_docs), len(listing_docs))

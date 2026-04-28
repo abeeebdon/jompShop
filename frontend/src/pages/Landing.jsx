@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ArrowRight, Globe, ShieldCheck, CurrencyCircleDollar, Package, ChartLineUp, Lightning } from "@phosphor-icons/react";
 import { useAuth } from "../lib/auth-context";
 import ThemeToggle from "../components/ThemeToggle";
@@ -11,12 +11,8 @@ const AGRO_IMG = "https://images.unsplash.com/photo-1622676566956-b42b50c84c31?c
 export default function Landing() {
   const { user } = useAuth();
   const nav = useNavigate();
-  useEffect(() => {
-    if (!user) return;
-    if (user.role === "consumer") nav("/shop");
-    else if (user.role === "jompstart_admin") nav("/admin/credit");
-    else nav("/dashboard");
-  }, [user, nav]);
+  // /about is informational — no auto-redirect; user can browse freely while signed-in.
+  void user; void nav;
 
   return (
     <div className="min-h-screen bg-[#0A1628] text-[#F5F5F5]">
@@ -26,7 +22,7 @@ export default function Landing() {
           <Link to="/" className="flex items-center gap-3" data-testid="brand-link">
             <img src="/jomp-icon.png" alt="Jomp" className="w-9 h-9 rounded-full"/>
             <div className="leading-tight">
-              <div className="font-bold tracking-[0.22em] text-sm">JOMP TRADE</div>
+              <div className="font-bold tracking-[0.22em] text-sm">JOMP SHOP</div>
               <div className="text-[10px] tracking-[0.3em] text-[#1A7A6E] font-mono">EXPORT OS</div>
             </div>
           </Link>
@@ -55,7 +51,7 @@ export default function Landing() {
               out of Nigeria &amp; Africa.
             </h1>
             <p className="mt-6 text-[17px] text-[#9CA3AF] leading-relaxed max-w-xl">
-              Jomp Trade unifies exporter onboarding, US-compliant product listings,
+              Jomp Shop unifies exporter onboarding, US-compliant product listings,
               full order lifecycle, document automation, and USD/NGN banking &mdash;
               with Riby Inc escrow and JompStart credit under the hood &mdash; so one trade
               doesn&rsquo;t take ten tools.
@@ -141,7 +137,7 @@ export default function Landing() {
             <h2 className="helix-h2">Fashion &amp; textiles. Agriculture. Staple foods. Physical goods.</h2>
             <p className="text-[#9CA3AF] mt-5 leading-relaxed">
               From Adire panels shipping out of Abeokuta to single-origin Ofada rice headed to Brooklyn,
-              Jomp Trade routes every dollar and document through one place &mdash; with Riby Inc holding
+              Jomp Shop routes every dollar and document through one place &mdash; with Riby Inc holding
               buyer funds in escrow until goods land.
             </p>
             <div className="mt-8 grid grid-cols-2 gap-3 max-w-md">
@@ -209,7 +205,7 @@ export default function Landing() {
 
       <footer className="border-t border-[#1A7A6E]/15 py-10">
         <div className="max-w-[1400px] mx-auto px-6 lg:px-10 text-center">
-          <div className="text-[12px] text-[#9CA3AF]">Jomp Trade — Connecting Africa to the World, One Trade at a Time</div>
+          <div className="text-[12px] text-[#9CA3AF]">Jomp Shop — Connecting Africa to the World, One Trade at a Time</div>
           <div className="text-[11px] text-[#1A7A6E] font-mono tracking-widest mt-3 flex flex-wrap justify-center gap-x-3 gap-y-1">
             <span>RIBY INC</span><span>·</span>
             <span>JOMPSTART DIGITAL LIMITED</span><span>·</span>

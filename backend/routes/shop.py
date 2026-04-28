@@ -32,7 +32,7 @@ log = logging.getLogger("helix.shop")
 
 RIBY_PARTNER = "Riby Inc"
 ESCROW_HOLDER = "Riby Inc (US Escrow)"
-PLATFORM_FEE_RATE = 0.02  # 2% Jomp Trade marketplace fee
+PLATFORM_FEE_RATE = 0.02  # 2% Jomp Shop marketplace fee
 
 
 def _now_iso() -> str:
