@@ -2,30 +2,19 @@
 
 Used by both seed.py (fresh DB) and scripts/load_50_listings.py (backfill).
 Each entry produces a `shop_listing` document. Images use a hybrid strategy:
-- Product-specific Unsplash photos for items where we have visually-verified matches
-- Branded placeholder cards (placehold.co with Jomp palette) for everything else,
-  which are guaranteed to display the product name accurately and on-brand.
+- Verified Unsplash photos for items where we have visually-verified matches
+- Inline-SVG `data:` cards (Jomp gradient + product-specific emoji + name) for the rest.
+  These render instantly, never 404, and look intentional (per-category palette + icon
+  like 🐟 for stockfish, 🎭 for masks, 🥁 for drums, 🌺 for hibiscus tea, etc.).
 """
 from __future__ import annotations
-from urllib.parse import quote_plus
 
-# Jomp brand palette for placeholders (used when no verified Unsplash match).
-# Each category gets a tinted, branded card so the marketplace stays visually cohesive.
-_PALETTE = {
-    "fashion":      ("F39C12", "FFFFFF"),  # Jomp orange / white
-    "agriculture":  ("1A7A6E", "FFFFFF"),  # forest teal / white
-    "staple-foods": ("C9922A", "0A1628"),  # gold / navy
-    "beauty":       ("F39C12", "1F1B2E"),  # orange / deep purple
-    "home-decor":   ("4A2E8A", "F39C12"),  # purple / orange
-    "accessories":  ("1A1A2E", "F39C12"),  # dark / orange
-    "beverages":    ("1A7A6E", "F5F5F5"),  # teal / cream
-}
+from product_image_gen import product_svg_url
 
 # Verified Unsplash IDs that visually depict their assigned products.
 # (Verified via screenshot inspection + analyze_file_tool checks — Feb 2026.)
 _UNSPLASH = {
     "adire":      "1528459105426-b9548367069b",
-    "ankara":     "1503342217505-b0a15ec3261c",
     "rice":       "1586201375761-83865001e31c",
     "rice_pack":  "1536304929831-ee1ca9d44906",
     "palm_oil":   "1604329760661-e71dc83f8f26",
@@ -41,12 +30,6 @@ _IMG_QS = "?auto=format&fit=crop&w=900&q=80"
 
 def img_unsplash(key: str) -> str:
     return f"{_IMG_BASE}{_UNSPLASH[key]}{_IMG_QS}"
-
-
-def img_placeholder(name: str, category: str) -> str:
-    bg, fg = _PALETTE.get(category, ("4A2E8A", "F39C12"))
-    # placehold.co renders a clean text card with the product name centered.
-    return f"https://placehold.co/900x675/{bg}/{fg}/png?text={quote_plus(name)}&font=poppins"
 
 
 # ------------------------------------------------------------
@@ -127,7 +110,7 @@ def to_listing_doc(idx: int, owner_business_id: str, item: tuple, now_iso: str) 
     if img_strat[0] == "u":
         photo = img_unsplash(img_strat[1])
     else:
-        photo = img_placeholder(title, cat)
+        photo = product_svg_url(title, cat, ships_from)
     # Country inference (simple)
     nigeria_keys = ("Lagos", "Ogun", "Edo", "Kano", "Ondo", "Benue", "Kogi",
                     "Cross River", "Oyo", "Abia", "Ilorin")
