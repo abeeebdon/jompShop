@@ -81,9 +81,7 @@ memory/test_credentials.md
 # Mobile development
 android-sdk/-e 
 # Environment and credential files
-.env
-.env.*
-*.env
+# (.env files MUST be tracked for K8s deployment — Emergent updates them at deploy time)
 credentials.json
 *.pem
 *.key

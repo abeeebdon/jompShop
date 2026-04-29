@@ -20,16 +20,19 @@ def _now_iso() -> str:
 
 
 async def _balance_for(business_id: str, currency: str) -> float:
-    """Compute balance from ledger transactions."""
-    cursor = db.transactions.find({"business_id": business_id, "currency": currency, "status": "completed"}, {"_id": 0})
-    txs = await cursor.to_list(10000)
-    bal = 0.0
-    for t in txs:
-        if t["type"] == "credit":
-            bal += t["amount"]
-        elif t["type"] in ("debit", "transfer", "fee"):
-            bal -= t["amount"]
-    return round(bal, 2)
+    """Compute balance from ledger transactions via aggregation (server-side, scalable)."""
+    pipeline = [
+        {"$match": {"business_id": business_id, "currency": currency, "status": "completed"}},
+        {"$group": {
+            "_id": None,
+            "credits": {"$sum": {"$cond": [{"$eq": ["$type", "credit"]}, "$amount", 0]}},
+            "debits": {"$sum": {"$cond": [{"$in": ["$type", ["debit", "transfer", "fee"]]}, "$amount", 0]}},
+        }},
+    ]
+    result = await db.transactions.aggregate(pipeline).to_list(1)
+    if not result:
+        return 0.0
+    return round(result[0]["credits"] - result[0]["debits"], 2)
 
 
 @router.get("/finance/dashboard")

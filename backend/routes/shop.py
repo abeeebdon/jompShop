@@ -55,10 +55,15 @@ async def list_listings(
     if search:
         q["title"] = {"$regex": search, "$options": "i"}
     items = await db.shop_listings.find(q, {"_id": 0}).sort("created_at", -1).to_list(200)
-    for it in items:
-        biz = await db.businesses.find_one({"id": it["owner_business_id"]}, {"_id": 0})
-        it["seller_name"] = biz.get("business_name") if biz else "Jomp Seller"
-        it["seller_country"] = biz.get("country") if biz else ""
+    # Batch business lookups to avoid N+1 queries
+    if items:
+        biz_ids = list({it["owner_business_id"] for it in items if it.get("owner_business_id")})
+        biz_docs = await db.businesses.find({"id": {"$in": biz_ids}}, {"_id": 0}).to_list(len(biz_ids)) if biz_ids else []
+        biz_map = {b["id"]: b for b in biz_docs}
+        for it in items:
+            biz = biz_map.get(it.get("owner_business_id"))
+            it["seller_name"] = biz.get("business_name") if biz else "Jomp Seller"
+            it["seller_country"] = biz.get("country") if biz else ""
     return items
 
 
