@@ -22,6 +22,8 @@ export default function Catalog() {
   const [category, setCategory] = useState("");
   const [country, setCountry] = useState("");
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  useEffect(() => { setPage(1); }, [category, country, search]);
 
   useEffect(() => {
     (async () => {
