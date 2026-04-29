@@ -91,7 +91,7 @@ export default function ProductDetail() {
       </div>
 
       {open && (
-        <div className="fixed inset-0 bg-[#0A1628]/80 backdrop-blur flex items-center justify-center z-50 p-4" onClick={() => setOpen(false)}>
+        <div className="fixed inset-0 bg-[#0A1628]/80 backdrop-blur flex items-start justify-center pt-16 pb-10 overflow-y-auto z-50 p-4" onClick={() => setOpen(false)}>
           <div onClick={(e) => e.stopPropagation()} className="helix-card w-full max-w-md p-6 fade-up" data-testid="rfq-modal">
             <div className="helix-label">Request Quotation</div>
             <h2 className="helix-h3 mt-1">{p.name}</h2>

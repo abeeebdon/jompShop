@@ -56,7 +56,7 @@ export default function AdminCredit() {
       )}
 
       {selected && (
-        <div className="fixed inset-0 bg-[#0A1628]/80 flex items-center justify-center z-50 p-4" onClick={() => setSelected(null)}>
+        <div className="fixed inset-0 bg-[#0A1628]/80 flex items-start justify-center pt-16 pb-10 overflow-y-auto z-50 p-4" onClick={() => setSelected(null)}>
           <div onClick={(e)=>e.stopPropagation()} className="helix-card p-6 w-full max-w-lg">
             <div className="helix-kicker">JompStart · Decision</div>
             <h3 className="helix-h3 mt-1">{selected.application_number} · {selected.business_name}</h3>

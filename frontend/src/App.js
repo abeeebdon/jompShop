@@ -29,6 +29,7 @@ import ConsumerOrders from "./pages/ConsumerOrders";
 import Sell from "./pages/Sell";
 import Fulfillment from "./pages/Fulfillment";
 import Repayment from "./pages/Repayment";
+import WithdrawalAccounts from "./pages/WithdrawalAccounts";
 
 function AppRouter() {
   const loc = useLocation();
@@ -52,6 +53,7 @@ function AppRouter() {
       <Route path="/orders/:id" element={<Protected><OrderDetail /></Protected>} />
       <Route path="/compliance" element={<Protected><Compliance /></Protected>} />
       <Route path="/finance" element={<Protected><Finance /></Protected>} />
+      <Route path="/finance/accounts" element={<Protected><WithdrawalAccounts /></Protected>} />
       <Route path="/credit" element={<Protected roles={["exporter"]}><Credit /></Protected>} />
       <Route path="/credit/:id" element={<Protected><CreditDetail /></Protected>} />
       <Route path="/repayment" element={<Protected roles={["exporter"]}><Repayment /></Protected>} />

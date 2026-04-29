@@ -4,6 +4,9 @@ import Shell from "../components/Shell";
 import { api, formatUSD, formatNGN } from "../lib/api";
 import { StatusPill } from "../components/StatusPill";
 import { MagnifyingGlass, CheckCircle } from "@phosphor-icons/react";
+import Pagination, { paginate } from "../components/Pagination";
+
+const PER_PAGE = 12;
 
 const CATEGORIES = [
   { value: "", label: "All Sectors" },
@@ -62,12 +65,18 @@ export default function Catalog() {
         </select>
       </div>
 
-      {loading ? <div className="text-[#9CA3AF]">Loading marketplace…</div> : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {items.map((p) => <ProductCard key={p.id} p={p} />)}
-          {items.length === 0 && <div className="col-span-full text-center text-[#9CA3AF] py-20">No products match your filters.</div>}
-        </div>
-      )}
+      {loading ? <div className="text-[#9CA3AF]">Loading marketplace…</div> : (() => {
+        const p = paginate(items, page, PER_PAGE);
+        return (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {p.items.map((it) => <ProductCard key={it.id} p={it} />)}
+              {items.length === 0 && <div className="col-span-full text-center text-[#9CA3AF] py-20">No products match your filters.</div>}
+            </div>
+            <Pagination page={p.page} totalPages={p.totalPages} onChange={(np)=>{ setPage(np); window.scrollTo({ top: 0, behavior: "smooth" }); }}/>
+          </>
+        );
+      })()}
     </Shell>
   );
 }

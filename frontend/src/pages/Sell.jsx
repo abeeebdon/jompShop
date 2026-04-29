@@ -107,7 +107,7 @@ function ListingForm({ isExporter, editing, onClose }) {
     finally { setBusy(false); }
   };
   return (
-    <div className="fixed inset-0 bg-[#0A1628]/80 flex items-center justify-center z-50 p-4" onClick={onClose}>
+    <div className="fixed inset-0 bg-[#0A1628]/80 flex items-start justify-center pt-16 pb-10 overflow-y-auto z-50 p-4" onClick={onClose}>
       <div onClick={(e)=>e.stopPropagation()} className="helix-card p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto" data-testid="listing-form">
         <h2 className="helix-h3">{editing ? "Edit listing" : `New ${mode === "riby_dtc" ? "direct-from-Africa" : "US in-stock"} listing`}</h2>
         <div className="mt-5 grid md:grid-cols-2 gap-4">

@@ -1,0 +1,48 @@
+{
+  "summary": "Iteration 8 — Withdrawal accounts CRUD + dual-currency withdrawals + pagination + top-anchored modals + accurate product images. Backend: 16/17 pytest pass (1 skipped: NGN balance below test threshold; not a defect). All withdrawal-banks (10), USD CRUD validation (missing bank_name → 400, bad routing → 400, bad type → 400), NGN CRUD validation (bad acct length → 400, unknown bank_code → 400), list+filter, PATCH (rename + un-defaults siblings of same currency), DELETE (soft, hides from list), withdraw-from-account (insufficient → 400, unknown → 404, deleted → 404, USD happy → rail ACH/WIRE + tx row currency=USD type=transfer), 50-listing storefront photos check, plus iter6/iter7 regression (23/23) all green. Frontend: /finance shows withdraw-ngn-btn, withdraw-usd-btn, manage-accounts-link. USD modal opens with panel_top=121.5px (well within 300px spec), shows Available balance, and when a USD account is present surfaces all 4 inner testids w-account-select / w-amount / w-narration / w-submit + 'Send via ACH/Wire' submit. /finance/accounts has usd-accounts + ngn-accounts sections, add-account-btn opens add-account-modal at panel_top=121.5px with ccy-USD/ccy-NGN tabs and complete field set (acc-label/acc-name/acc-bank-code/acc-number/acc-save for NGN; acc-label/acc-name/acc-usd-bank/acc-routing/acc-number/acc-type/acc-save for USD). /shop pagination shows 20 cards, page-prev/page-next/page-2/page-3 visible, 'SHOWING 1–20 OF 58' → click page-2 → 'SHOWING 21–40 OF 58'. (Note: 58 = 50 catalog + 8 leftover TEST_iter6 items.) Storefront images: Home + all 7 category pages render, 0 broken images on any page; mix of 8 placehold.co + 12 unsplash imgs on home — both strategies in use. CRITICAL UI BUG found: /catalog page throws ReferenceError 'page is not defined' at Catalog.jsx:69 — missing useState([page,setPage]) declaration; renders red 'Uncaught runtime errors' overlay instead of catalog grid.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "Catalog.jsx", "issue": "ReferenceError: page is not defined — line 69 references `page` and line 76 calls `setPage(np)` but neither is declared via useState. /catalog crashes with red error overlay; no products render.", "selector": "/catalog route", "priority": "CRITICAL"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Finance withdraw modal", "issues": ["React hydration warning: <span> cannot be a child of <option>. The select inside WithdrawModal wraps option text in a ve-tracked <span>; renders fine but logs noisy console error. Cosmetic only."]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration8_withdrawals.py",
+    "/app/test_reports/pytest/pytest_iter8.xml"
+  ],
+  "action_items": [
+    "FIX (HIGH): Add `const [page, setPage] = useState(1);` near top of Catalog.jsx (around line 22) — currently /catalog is fully broken with ReferenceError. After fix, also reset page when filters change (useEffect on category/country/search → setPage(1)).",
+    "OPTIONAL: Suppress the ve-tracking <span> wrapper for <option> children in WithdrawModal account select to silence hydration warning (cosmetic).",
+    "OPTIONAL: Cleanup leftover TEST_iter6_* listings from shop_listings (carry-over from iter7) so /shop shows exactly 50, not 58."
+  ],
+  "critical_code_review_comments": [
+    "withdrawal_accounts.py validation is correct and idempotent: NGN bank_code whitelist (10 banks), 10-digit account_number, USD routing 9-digits, account_type ∈ checking/savings, currency uppercased.",
+    "Setting is_default=true correctly un-defaults siblings of same currency (PATCH and POST both honor this).",
+    "Soft-delete keeps history of past withdrawals — correct design (transactions retain withdrawal_account_id reference).",
+    "withdraw-from-account computes balance via _balance_for(currency) — uses transactions ledger and treats type='transfer' as debit; this means the inserted transfer leg immediately reduces the available balance (regression-correct).",
+    "USD payout is mocked: synth tx ID 'anchor_usd_payout_*' + rail='ACH'/'WIRE' (WIRE only when no routing_number provided). Clearly logged. Properly flagged in mocked_apis.",
+    "Modal.jsx uses 'flex items-start … pt-16' wrapper — verified panel_top ≈ 121.5px on /finance and /finance/accounts, well under the 300px spec.",
+    "Pagination.jsx + paginate() helper integrated on /shop; 'Showing X–Y of N' text + page-prev/next/page-{n} testids all present and functional.",
+    "Catalog.jsx is missing the page state — looks like a copy-paste oversight when adding pagination. The Pagination component itself is fine."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iteration8_withdrawals.py (new — 17 pytest cases: bank list, USD/NGN CRUD + validations, list/filter, PATCH, DELETE soft, withdraw-from-account happy/insufficient/unknown/deleted, USD payout rail ∈ {ACH,WIRE}, 50-listing photo regression, cleanup)"
+  ],
+  "success_rate": {
+    "backend": "100% functional (16 pass, 1 skipped due to insufficient seeded NGN balance — not a defect; iter6+iter7 regression 23/23)",
+    "frontend": "92% — 12 of 13 frontend assertions green (USD modal positioning + fields, accounts page, pagination, storefront images all 7 categories, modal panel_top<300px). 1 critical fail: /catalog crashes with ReferenceError."
+  },
+  "test_credentials": "exporter@helix.com / Helix@123 (used as in /app/memory/test_credentials.md). Exporter business has $20,174.32 USD balance (matches review request claim of >$17K).",
+  "seed_data_creation": "Created and cleaned: TEST_acc_* withdrawal accounts (USD+NGN+disposable). All deleted via DELETE endpoint at end of test. The TEST_iter6_* listings carrying over from iter6/iter7 were NOT touched (cosmetic).",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Iter8 backend suite at /app/backend/tests/test_iteration8_withdrawals.py is the new authoritative regression for withdrawal accounts + dual-currency withdrawals. The single critical UI bug is /catalog → ReferenceError 'page is not defined' (Catalog.jsx missing useState([page,setPage])). All other features work as specified — modal positioning, pagination on /shop, image strategy (placehold.co + unsplash mix), and storefront category navigation all verified. Re-run only Catalog.jsx after fix; everything else is solid.",
+  "rca of the issue": "Catalog.jsx pagination refactor introduced a `paginate(items, page, PER_PAGE)` call and `setPage(np)` handler, but the corresponding `const [page, setPage] = useState(1);` line was not added. React throws ReferenceError at render. Reproduce: log in as any role with access to /catalog (buyer or exporter), navigate to /catalog. Expected: paginated 12/page grid. Actual: red 'Uncaught runtime errors' overlay with stack trace pointing to Catalog component. Mitigation: add `const [page, setPage] = useState(1);` at line 22 (after the search useState) and a `useEffect(() => setPage(1), [category, country, search])` so filter changes reset to page 1."
+}

@@ -73,7 +73,7 @@ export default function OrderDetail() {
             <div className="flex items-center gap-2 overflow-x-auto">
               {LIFECYCLE.map((s, i) => (
                 <div key={s} className="flex items-center gap-2 flex-shrink-0">
-                  <div className={`w-7 h-7 rounded-full flex items-center justify-center ${i <= currentIdx ? "bg-[#C9922A] text-[#0A1628]" : "bg-[#0A1628] border border-[#1A7A6E]/40 text-[#9CA3AF]"}`}>
+                  <div className={`w-7 h-7 rounded-full flex items-start justify-center pt-16 pb-10 overflow-y-auto ${i <= currentIdx ? "bg-[#C9922A] text-[#0A1628]" : "bg-[#0A1628] border border-[#1A7A6E]/40 text-[#9CA3AF]"}`}>
                     {i <= currentIdx ? <CheckCircle size={14} weight="fill"/> : <span className="text-[11px] font-mono">{i+1}</span>}
                   </div>
                   <div className="text-[11px] uppercase tracking-wider whitespace-nowrap" style={{ color: i <= currentIdx ? "#F5F5F5" : "#9CA3AF"}}>{LABELS[s]}</div>
@@ -190,7 +190,7 @@ export default function OrderDetail() {
       </div>
 
       {disputeOpen && (
-        <div className="fixed inset-0 bg-[#0A1628]/80 flex items-center justify-center z-50 p-4" onClick={() => setDisputeOpen(false)}>
+        <div className="fixed inset-0 bg-[#0A1628]/80 flex items-start justify-center pt-16 pb-10 overflow-y-auto z-50 p-4" onClick={() => setDisputeOpen(false)}>
           <div onClick={(e)=>e.stopPropagation()} className="helix-card w-full max-w-md p-6">
             <h3 className="helix-h3">Raise dispute</h3>
             <div className="space-y-3 mt-4">

@@ -33,7 +33,7 @@ export default function Credit() {
       <div className="helix-card p-6 mb-6 relative overflow-hidden">
         <div className="absolute -top-10 -right-10 w-64 h-64 rounded-full bg-[#C9922A]/10 blur-3xl pointer-events-none"/>
         <div className="flex items-start gap-4 relative">
-          <div className="w-12 h-12 rounded-md flex items-center justify-center font-bold text-[#0A1628] text-lg" style={{ background: "linear-gradient(135deg,#C9922A,#1A7A6E)" }}>J</div>
+          <div className="w-12 h-12 rounded-md flex items-start justify-center pt-16 pb-10 overflow-y-auto font-bold text-[#0A1628] text-lg" style={{ background: "linear-gradient(135deg,#C9922A,#1A7A6E)" }}>J</div>
           <div className="flex-1">
             <div className="helix-kicker">Credit · Technology Partner</div>
             <h2 className="helix-h3 mt-1">JompStart Digital Limited</h2>
@@ -145,7 +145,7 @@ function ApplyModal({ elig, onClose }) {
     finally { setBusy(false); }
   };
   return (
-    <div className="fixed inset-0 bg-[#0A1628]/80 flex items-center justify-center z-50 p-4" onClick={onClose}>
+    <div className="fixed inset-0 bg-[#0A1628]/80 flex items-start justify-center pt-16 pb-10 overflow-y-auto z-50 p-4" onClick={onClose}>
       <div onClick={(e)=>e.stopPropagation()} className="helix-card p-6 w-full max-w-md fade-up" data-testid="apply-modal">
         <div className="helix-kicker">JompStart Digital</div>
         <h2 className="helix-h3 mt-1">Apply for credit</h2>

@@ -16,6 +16,7 @@ const NAV = {
     { to: "/fulfillment", label: "Fulfillment", icon: ShoppingCart },
     { to: "/compliance", label: "Compliance", icon: ShieldCheck },
     { to: "/finance", label: "Finance", icon: Wallet },
+    { to: "/finance/accounts", label: "Withdrawal Accounts", icon: HandCoins },
     { to: "/credit", label: "Business Credit", icon: HandCoins },
     { to: "/repayment", label: "Repayments", icon: ArrowsClockwise },
     { to: "/onboarding", label: "Business Profile", icon: FileText },
@@ -27,6 +28,7 @@ const NAV = {
     { to: "/sell", label: "Local Inventory Shop", icon: ShoppingCart },
     { to: "/fulfillment", label: "Fulfillment", icon: Truck },
     { to: "/finance", label: "Finance", icon: Wallet },
+    { to: "/finance/accounts", label: "Withdrawal Accounts", icon: HandCoins },
     { to: "/onboarding", label: "Business Profile", icon: FileText },
   ],
   admin: [

@@ -5,11 +5,15 @@ import { api, formatUSD, formatDateTime } from "../lib/api";
 import { StatusPill } from "../components/StatusPill";
 import { toast } from "sonner";
 import { Truck, LockKey, CheckCircle, ChatCircle } from "@phosphor-icons/react";
+import Pagination, { paginate } from "../components/Pagination";
+
+const PER_PAGE = 10;
 
 export default function ConsumerOrders() {
   const [orders, setOrders] = useState([]);
   const [quotes, setQuotes] = useState({ as_consumer: [], as_seller: [] });
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
   const load = async () => {
     const [o, q] = await Promise.all([api.get("/shop/orders/mine"), api.get("/shop/quotes/mine")]);
     setOrders(o.data); setQuotes(q.data);
@@ -74,9 +78,11 @@ export default function ConsumerOrders() {
       <div className="helix-label mb-3">Orders</div>
       {loading ? <div className="text-[#9CA3AF]">Loading…</div> : orders.length === 0 ? (
         <div className="helix-card p-12 text-center text-[#9CA3AF]">No orders yet. <Link to="/shop" className="text-[#C9922A]">Start shopping →</Link></div>
-      ) : (
+      ) : (() => {
+        const p = paginate(orders, page, PER_PAGE);
+        return (
         <div className="space-y-4">
-          {orders.map(o => (
+          {p.items.map(o => (
             <div key={o.id} className="helix-card p-5" data-testid={`consumer-order-${o.id}`}>
               <div className="flex items-start justify-between flex-wrap gap-3">
                 <div>
@@ -116,7 +122,9 @@ export default function ConsumerOrders() {
             </div>
           ))}
         </div>
-      )}
+        );
+      })()}
+      <Pagination page={Math.min(page, Math.max(1, Math.ceil(orders.length / PER_PAGE)))} totalPages={Math.max(1, Math.ceil(orders.length / PER_PAGE))} onChange={setPage}/>
     </ShopShell>
   );
 }

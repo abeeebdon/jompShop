@@ -6,6 +6,9 @@ import {
   MagnifyingGlass, Truck, Storefront, Package as PackageIcon,
   Coffee, Sparkle, Cube, ShoppingBag, House, Star,
 } from "@phosphor-icons/react";
+import Pagination, { paginate } from "../components/Pagination";
+
+const PER_PAGE = 20;
 
 const CATS = [
   { value: "fashion", label: "Fashion & Textiles", icon: ShoppingBag, hint: "Adire · Ankara · Kente · Aso-Oke" },
@@ -24,6 +27,7 @@ export default function Shop() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState(params.get("q") || "");
+  const [page, setPage] = useState(1);
   const category = params.get("category") || "";
   const mode = params.get("mode") || "";
 
@@ -38,6 +42,7 @@ export default function Shop() {
       setItems(data); setLoading(false);
     })();
   }, [category, mode, search]);
+  useEffect(() => { setPage(1); }, [category, mode, search]);
 
   const submitSearch = (e) => {
     e.preventDefault();
@@ -153,12 +158,23 @@ export default function Shop() {
           </span>
         )}
       </div>
-      {loading ? <div className="text-[#9CA3AF]">Loading shop…</div> : (
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-          {items.map(l => <ListingCard key={l.id} l={l}/>)}
-          {items.length === 0 && <div className="col-span-full text-center text-[#9CA3AF] py-16">No products match your filters.</div>}
-        </div>
-      )}
+      {loading ? <div className="text-[#9CA3AF]">Loading shop…</div> : (() => {
+        const p = paginate(items, page, PER_PAGE);
+        return (
+          <>
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+              {p.items.map(l => <ListingCard key={l.id} l={l}/>)}
+              {items.length === 0 && <div className="col-span-full text-center text-[#9CA3AF] py-16">No products match your filters.</div>}
+            </div>
+            <Pagination page={p.page} totalPages={p.totalPages} onChange={(np)=>{ setPage(np); window.scrollTo({ top: 0, behavior: "smooth" }); }}/>
+            {items.length > 0 && (
+              <div className="text-center text-[11px] text-[#9CA3AF] font-mono uppercase tracking-wider mt-1">
+                Showing {p.start + 1}–{p.end} of {p.total}
+              </div>
+            )}
+          </>
+        );
+      })()}
     </ShopShell>
   );
 }

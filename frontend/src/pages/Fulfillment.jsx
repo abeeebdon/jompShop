@@ -130,7 +130,7 @@ export default function Fulfillment() {
       )}
 
       {respond && (
-        <div className="fixed inset-0 bg-[#0A1628]/80 flex items-center justify-center z-50 p-4" onClick={() => setRespond(null)}>
+        <div className="fixed inset-0 bg-[#0A1628]/80 flex items-start justify-center pt-16 pb-10 overflow-y-auto z-50 p-4" onClick={() => setRespond(null)}>
           <div onClick={(e)=>e.stopPropagation()} className="helix-card p-6 w-full max-w-md">
             <div className="helix-kicker">Respond · {respond.quote_number}</div>
             <h3 className="helix-h3 mt-1">{respond.listing_title}</h3>

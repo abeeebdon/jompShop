@@ -25,6 +25,7 @@ from routes.webhooks import router as webhooks_router  # noqa: E402
 from routes.files import router as files_router  # noqa: E402
 from routes.credit import router as credit_router  # noqa: E402
 from routes.shop import router as shop_router  # noqa: E402
+from routes.withdrawal_accounts import router as withdrawals_router  # noqa: E402
 
 logging.basicConfig(
     level=logging.INFO,
@@ -74,7 +75,7 @@ async def _shutdown():
 
 # register routers
 for r in (auth_router, onboarding_router, catalog_router, orders_router,
-          compliance_router, finance_router, webhooks_router, files_router, credit_router, shop_router):
+          compliance_router, finance_router, webhooks_router, files_router, credit_router, shop_router, withdrawals_router):
     app.include_router(r)
 
 

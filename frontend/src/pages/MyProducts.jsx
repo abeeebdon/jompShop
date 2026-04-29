@@ -115,7 +115,7 @@ function ProductForm({ onClose, editing, fx }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#0A1628]/80 backdrop-blur flex items-center justify-center p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-50 bg-[#0A1628]/80 backdrop-blur flex items-start justify-center pt-16 pb-10 overflow-y-auto p-4" onClick={onClose}>
       <div onClick={(e) => e.stopPropagation()} className="helix-card w-full max-w-2xl p-6 fade-up max-h-[90vh] overflow-y-auto" data-testid="product-form">
         <h2 className="helix-h3">{editing ? "Edit product" : "Create product"}</h2>
         <div className="mt-5 grid md:grid-cols-2 gap-4">

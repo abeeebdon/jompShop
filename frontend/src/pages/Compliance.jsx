@@ -113,7 +113,7 @@ function AddDocModal({ onClose }) {
     catch (err) { toast.error(err.response?.data?.detail || "Failed"); }
   };
   return (
-    <div className="fixed inset-0 bg-[#0A1628]/80 flex items-center justify-center z-50 p-4" onClick={onClose}>
+    <div className="fixed inset-0 bg-[#0A1628]/80 flex items-start justify-center pt-16 pb-10 overflow-y-auto z-50 p-4" onClick={onClose}>
       <div onClick={(e)=>e.stopPropagation()} className="helix-card p-6 w-full max-w-md" data-testid="add-doc-modal">
         <h3 className="helix-h3">Add compliance document</h3>
         <div className="space-y-3 mt-4">

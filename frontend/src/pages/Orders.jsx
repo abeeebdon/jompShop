@@ -4,11 +4,15 @@ import Shell from "../components/Shell";
 import { api, formatUSD, formatDate } from "../lib/api";
 import { useAuth } from "../lib/auth-context";
 import { StatusPill } from "../components/StatusPill";
+import Pagination, { paginate } from "../components/Pagination";
+
+const PER_PAGE = 15;
 
 export default function Orders() {
   const { user } = useAuth();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
   useEffect(() => {
     (async () => {
       try {
@@ -24,7 +28,9 @@ export default function Orders() {
           <div className="helix-card p-12 text-center text-[#9CA3AF]">
             No orders yet. {user?.role === "buyer" ? "Browse the marketplace to submit an RFQ." : "Inbound RFQs and confirmed trades will appear here."}
           </div>
-        ) : (
+        ) : (() => {
+          const p = paginate(orders, page, PER_PAGE);
+          return (
         <div className="helix-card overflow-hidden">
           <table className="helix-table">
             <thead>
@@ -33,7 +39,7 @@ export default function Orders() {
               </tr>
             </thead>
             <tbody>
-              {orders.map((o) => (
+              {p.items.map((o) => (
                 <tr key={o.id} data-testid={`order-row-${o.id}`}>
                   <td><Link to={`/orders/${o.id}`} className="font-mono text-[#C9922A]">{o.order_number}</Link></td>
                   <td className="text-[12px]">{o.buyer_user_id === user.user_id ? "Buyer" : "Supplier"}</td>
@@ -47,8 +53,11 @@ export default function Orders() {
               ))}
             </tbody>
           </table>
+          <Pagination page={p.page} totalPages={p.totalPages} onChange={setPage}/>
         </div>
-      )}
+          );
+        })()
+      }
     </Shell>
   );
 }
